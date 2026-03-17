@@ -6,8 +6,8 @@ from utils import utc_now
 class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    first_name: str = Field(sa_column=Column(String(50)), nullable=False)
-    last_name: str = Field(sa_column=Column(String(50)), nullable=False)
+    first_name: str = Field(sa_column=Column(String(50), nullable=False))
+    last_name: str = Field(sa_column=Column(String(50), nullable=False))
 
     email: str = Field(
         sa_column=Column(String(255), index=True, unique=True, nullable=False)
