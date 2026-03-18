@@ -1,12 +1,12 @@
 from sqlmodel import Session, select
 from app.users.models import User
-from app.auths.models import TokenBlacklist
+from app.auths.models import RefreshToken
 from app.core.security import (verify_password,
                                create_access_token,
                                create_refresh_token)
 from app.core.config import settings
 from app.core.database import SessionDep
-from datetime import datetime, timezone, timedelta
+from datetime import timedelta
 
 def get_user_by_email(session: Session, email: str) -> User | None:
     return session.exec(select(User).where(User.email == email)).first()
@@ -38,17 +38,35 @@ def generate_auth_tokens(user_id: int):
     )
     return access_token, refresh_token
 
-def check_token_blacklist(session: SessionDep, refresh_token: str) -> TokenBlacklist | None :
-    blacklisted = session.exec(
-        select(TokenBlacklist).where(TokenBlacklist.refresh_token == refresh_token)
+def is_token_revoked(refresh_token: str, session: SessionDep) -> bool:
+    token = session.exec(
+        select(RefreshToken).where(
+            (RefreshToken.token == refresh_token) &
+            (RefreshToken.revoked == True)
+        )
     ).first()
 
-    return blacklisted
+    return token is not None
 
-def remove_refresh_token(refresh_token, exp):
-    expires_at = datetime.fromtimestamp(exp, tz=timezone.utc)
+def revoke_refresh_token(refresh_token, session: SessionDep) -> RefreshToken | None:
+    token = session.exec(
+        select(RefreshToken).where(RefreshToken.token == refresh_token)
+    ).first()
+    
+    if not token:
+        return None
+    
+    token.revoked = True
+    session.add(token)
+    session.commit()
 
-    return TokenBlacklist(
-        refresh_token = refresh_token,
-        expires_at= expires_at
-    )
+    return token
+
+def is_refresh_token_in_db(refresh_token: str, session: SessionDep) -> bool:
+    token_in_db = session.exec(
+        select(RefreshToken).where(
+            RefreshToken.token == refresh_token
+        )
+    ).first()
+
+    return token_in_db is not None

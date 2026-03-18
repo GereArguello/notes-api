@@ -2,6 +2,9 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.exc import IntegrityError
 from app.users.schemas import UserCreate, UserRead, UserUpdate, UserUpdatePassword
 from app.users.models import User
+from app.users.service import (update_user_service,
+                               update_password_service,
+                               revoke_all_refresh_tokens)
 from app.core.database import SessionDep
 from app.core.security import get_password_hash, verify_password
 from app.utils import utc_now
@@ -48,57 +51,24 @@ def create_user(
 def read_me(current_user: User = Depends(get_current_user)):
     return current_user
 
-@router.patch("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
-def update_user(user_id: int, user_data: UserUpdate, session: SessionDep):
-
-    user = session.get(User, user_id)
-
-    if not user:
+@router.patch("/me", response_model=UserRead, status_code=status.HTTP_200_OK)
+def update_user(update_data: UserUpdate, session: SessionDep, current_user: User = Depends(get_current_user)):
+    
+    if not update_data:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Usuario no encontrado"
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No se enviaron datos para actualizar"
         )
+    
+    return update_user_service(current_user, update_data, session)
 
-    update_data = user_data.model_dump(exclude_unset=True)
-
-    user.sqlmodel_update(update_data)
-
-    session.commit()
-    session.refresh(user)
-
-    return user
-
-@router.patch("/{user_id}/update-password",
+@router.patch("/me/password",
               status_code=status.HTTP_200_OK)
-def update_password(user_id: int,
+def update_password(
                     password_data: UserUpdatePassword,
-                    session: SessionDep):
-    
-    user = session.get(User, user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Usuario no encontrado"
-        )
-
-    if user.deleted_at:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="El usuario está desactivado"
-        )
-    
-    if not verify_password(password_data.current_password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Contraseña actual incorrecta"
-        )
-
-    if verify_password(password_data.new_password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="La nueva contraseña no puede ser igual a la actual"
-        )
+                    session: SessionDep,
+                    current_user: User = Depends(get_current_user)
+):
     
     if password_data.new_password != password_data.new_password2:
         raise HTTPException(
@@ -106,10 +76,22 @@ def update_password(user_id: int,
             detail="Las contraseñas no coinciden"
         )
     
-    user.password_hash = get_password_hash(password_data.new_password)
+    if not verify_password(password_data.current_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Contraseña actual incorrecta"
+        )
 
-    session.commit()
-    session.refresh(user)
+    if verify_password(password_data.new_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La nueva contraseña no puede ser igual a la actual"
+        )
+    
+    update_password_service(current_user, password_data.new_password, session)
+
+    revoke_all_refresh_tokens(current_user.id, session)
+
 
     return {"message": "Contraseña actualizada correctamente"}
 
