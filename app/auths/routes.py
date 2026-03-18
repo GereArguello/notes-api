@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
+from jose.exceptions import JWTError
 
 from app.core.database import get_session, SessionDep
 from app.core.security import decode_token
@@ -43,7 +44,13 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(),
 @router.post("/refresh")
 def refresh_token(data: RefreshTokenRequest, session: SessionDep):
     refresh_token = data.refresh_token
-    payload = decode_token(refresh_token)
+    try:
+        payload = decode_token(refresh_token)
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido"
+        )
 
     if payload.get("type") != "refresh":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -79,9 +86,9 @@ def refresh_token(data: RefreshTokenRequest, session: SessionDep):
             detail="Token inválido"
         )
 
-    blacklist = remove_refresh_token(refresh_token, exp)
+    blacklist_entry = remove_refresh_token(refresh_token, exp)
 
-    session.add(blacklist)
+    session.add(blacklist_entry)
     session.commit()
 
     return {
@@ -90,15 +97,21 @@ def refresh_token(data: RefreshTokenRequest, session: SessionDep):
         "token_type": "bearer"
     }
 
-@router.post("/logout")
-def logout(refresh_token: str, session: SessionDep):
-    payload = decode_token(refresh_token)
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(data: RefreshTokenRequest, session: SessionDep):
+    try:
+        payload = decode_token(data.refresh_token)
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido"
+        )
 
     if payload.get("type") != "refresh":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail = "Token inválido")
 
-    blacklisted = check_token_blacklist(session, refresh_token)
+    blacklisted = check_token_blacklist(session, data.refresh_token)
 
     if blacklisted:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
@@ -112,9 +125,9 @@ def logout(refresh_token: str, session: SessionDep):
             detail="Token inválido"
         )
 
-    blacklist = remove_refresh_token(refresh_token, exp)
+    blacklist_entry = remove_refresh_token(data.refresh_token, exp)
 
-    session.add(blacklist)
+    session.add(blacklist_entry)
     session.commit()
 
-    return{"message": "Logout exitoso"}
+    return

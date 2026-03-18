@@ -1,11 +1,11 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from sqlalchemy.exc import IntegrityError
-from datetime import datetime
 from app.users.schemas import UserCreate, UserRead, UserUpdate, UserUpdatePassword
 from app.users.models import User
 from app.core.database import SessionDep
 from app.core.security import get_password_hash, verify_password
 from app.utils import utc_now
+from app.auths.dependencies import get_current_user
 
 
 
@@ -44,17 +44,9 @@ def create_user(
             detail="El email ya está registrado"
         )
 
-@router.get("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
-def read_user(user_id: int, session: SessionDep):
-    user = session.get(User, user_id)
-
-    if not user or user.deleted_at:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Usuario no encontrado"
-        )
-    
-    return user
+@router.get("/me", response_model=UserRead, status_code=status.HTTP_200_OK)
+def read_me(current_user: User = Depends(get_current_user)):
+    return current_user
 
 @router.patch("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
 def update_user(user_id: int, user_data: UserUpdate, session: SessionDep):

@@ -50,3 +50,16 @@ def created_user(client):
     data = response.json()
     data["raw_password"] = password
     return data
+
+@pytest.fixture(name="user_login")
+def user_login(client, created_user):
+    response = client.post(
+        "/auth/login",
+        data = {
+            "username": created_user["email"],
+            "password": created_user["raw_password"]
+        }
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    return response.json()
