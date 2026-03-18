@@ -37,20 +37,16 @@ def login(session: SessionDep, form_data: OAuth2PasswordRequestForm = Depends())
     
     access_token, refresh_token = generate_auth_tokens(user.id)
 
-    try:
-        payload = decode_token(refresh_token)
-        exp = payload.get("exp")
+ 
+    payload = decode_token(refresh_token)
+    exp = payload.get("exp")
 
-        if not exp:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token inválido"
-            )
-    except JWTError:
+    if not exp:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido"
         )
+
 
     expires_at = datetime.fromtimestamp(exp, tz=timezone.utc)
 
@@ -73,13 +69,9 @@ def login(session: SessionDep, form_data: OAuth2PasswordRequestForm = Depends())
 def refresh_token(data: RefreshTokenRequest, session: SessionDep):
     incoming_refresh_token = data.refresh_token
 
-    try:
-        payload = decode_token(incoming_refresh_token)
-    except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido"
-        )
+
+    payload = decode_token(incoming_refresh_token)
+
     
     if payload.get("type") != "refresh":
         raise HTTPException(
@@ -144,13 +136,9 @@ def refresh_token(data: RefreshTokenRequest, session: SessionDep):
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 def logout(data: RefreshTokenRequest, session: SessionDep):
     refresh_token = data.refresh_token
-    try:
-        payload = decode_token(refresh_token)
-    except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido"
-        )
+
+    payload = decode_token(refresh_token)
+
 
     if not is_refresh_token_in_db(refresh_token, session):
         raise HTTPException(
