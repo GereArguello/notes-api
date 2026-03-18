@@ -54,7 +54,7 @@ def read_me(current_user: User = Depends(get_current_user)):
 @router.patch("/me", response_model=UserRead, status_code=status.HTTP_200_OK)
 def update_user(update_data: UserUpdate, session: SessionDep, current_user: User = Depends(get_current_user)):
     
-    if not update_data:
+    if not update_data.model_dump(exclude_unset=True):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No se enviaron datos para actualizar"
@@ -95,39 +95,20 @@ def update_password(
 
     return {"message": "Contraseña actualizada correctamente"}
 
-@router.patch("/{user_id}/deactivate", status_code=status.HTTP_200_OK)
-def deactivate_user(user_id: int, session: SessionDep):
-    
-    user = session.get(User, user_id)
+@router.patch("/me/deactivate", status_code=status.HTTP_204_NO_CONTENT)
+def deactivate_user(session: SessionDep, current_user: User = Depends(get_current_user)):
+        
+    if not current_user.deleted_at:
+        current_user.deleted_at = utc_now()
+        revoke_all_refresh_tokens(current_user.id, session)
+        session.commit()
 
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Usuario no encontrado"
-        )
-    
-    if user.deleted_at:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="El usuario ya está desactivado"
-        )
 
-    user.deleted_at = utc_now()
 
-    session.commit()
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(session: SessionDep, current_user: User = Depends(get_current_user)):
 
-    return {"message": "Usuario desactivado"}
+    revoke_all_refresh_tokens(current_user.id, session)
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(user_id: int, session: SessionDep):
-
-    user = session.get(User, user_id)
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Usuario no encontrado"
-        )
-    
-    session.delete(user)
+    session.delete(current_user)
     session.commit()
