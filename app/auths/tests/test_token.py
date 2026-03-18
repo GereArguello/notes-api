@@ -20,8 +20,9 @@ def test_should_return_401_if_token_is_malformed(client):
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-def test_token_allows_access_to_protected_endpoint(client, user_login):
+def test_token_allows_access_to_protected_endpoint(user_login):
     token = user_login["access_token"]
+    client = user_login["client"]
 
     response = client.get(
         "/users/me",
@@ -52,12 +53,11 @@ def test_should_return_401_if_token_expired(client, created_user, session):
 
 #----- TESTS PARA TOKEN DE REFRESCO -----#
     
-def test_refresh_returns_new_tokens(client, user_login):
-    refresh_token = user_login["refresh_token"]
+def test_refresh_returns_new_tokens(user_login):
+    client = user_login["client"]
 
     response = client.post(
         "/auth/refresh",
-        json={"refresh_token": refresh_token}
     )
 
     assert response.status_code == status.HTTP_200_OK
@@ -65,7 +65,6 @@ def test_refresh_returns_new_tokens(client, user_login):
     body = response.json()
 
     assert "access_token" in body
-    assert "refresh_token" in body
     assert body["token_type"] == "bearer"
 
 def test_refresh_fails_if_token_expired(client, created_user, session):
@@ -86,29 +85,26 @@ def test_refresh_fails_if_token_expired(client, created_user, session):
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 def test_refresh_fails_if_token_is_not_refresh(client, user_login):
-    access_token = user_login["access_token"]
+    client = user_login["client"]
+    client.cookies.set("refresh_token", "fake_token")
 
     response = client.post(
         "/auth/refresh",
-        json={"refresh_token": access_token}
     )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-def test_refresh_token_cannot_be_reused(client, user_login):
-    refresh_token = user_login["refresh_token"]
-
+def test_refresh_token_cannot_be_reused(user_login):
+    client = user_login["client"]
     # primer uso (válido)
     response1 = client.post(
         "/auth/refresh",
-        json={"refresh_token": refresh_token}
     )
     assert response1.status_code == status.HTTP_200_OK
 
     # segundo uso (debería fallar)
     response2 = client.post(
         "/auth/refresh",
-        json={"refresh_token": refresh_token}
     )
 
     assert response2.status_code == status.HTTP_401_UNAUTHORIZED

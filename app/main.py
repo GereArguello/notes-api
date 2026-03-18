@@ -1,6 +1,4 @@
 from fastapi import FastAPI
-from sqlmodel import SQLModel
-from app.core.database import engine
 from app.users import routes as users_router
 from app.auths import routes as auths_router
 

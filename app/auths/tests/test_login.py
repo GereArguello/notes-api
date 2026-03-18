@@ -12,7 +12,6 @@ def test_user_can_login(client, created_user):
     assert response.status_code == status.HTTP_200_OK
     body = response.json()
     assert "access_token" in body
-    assert "refresh_token" in body
     assert body["token_type"] == "bearer"
 
 def test_login_should_fail_if_credentials_are_invalid(client, created_user):

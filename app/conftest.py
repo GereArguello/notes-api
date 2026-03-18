@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, Session
 from app.core.database import get_session
+from app.core.config import settings
 from app.main import app
 
 sqlite_url = "sqlite:///:memory:"
@@ -21,6 +22,10 @@ def session_fixture():
     with Session(engine) as session:
         yield session
     SQLModel.metadata.drop_all(engine)
+
+@pytest.fixture(autouse=True)
+def override_settings():
+    settings.COOKIE_SECURE = False
 
 @pytest.fixture(name="client")
 def client_fixture(session: Session):
@@ -55,11 +60,13 @@ def created_user(client):
 def user_login(client, created_user):
     response = client.post(
         "/auth/login",
-        data = {
+        data={
             "username": created_user["email"],
             "password": created_user["raw_password"]
         }
     )
-    assert response.status_code == status.HTTP_200_OK
-
-    return response.json()
+    assert response.status_code == 200
+    return {
+        "client": client,
+        "access_token": response.json()["access_token"]
+    }

@@ -70,3 +70,15 @@ def is_refresh_token_in_db(refresh_token: str, session: SessionDep) -> bool:
     ).first()
 
     return token_in_db is not None
+
+def new_refresh_token_db(user_id, new_refresh_token, expires_at, session: SessionDep) -> RefreshToken:
+    refresh_token_db = RefreshToken(
+        user_id=user_id,
+        token=new_refresh_token,
+        expires_at=expires_at
+    )
+
+    session.add(refresh_token_db)
+    session.commit()
+
+    return refresh_token_db
