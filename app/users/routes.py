@@ -60,7 +60,9 @@ def update_user(update_data: UserUpdate, session: SessionDep, current_user: User
             detail="No se enviaron datos para actualizar"
         )
     
-    return update_user_service(current_user, update_data, session)
+    return update_user_service(current_user,
+                               update_data.model_dump(exclude_unset=True),
+                               session)
 
 @router.patch("/me/password",
               status_code=status.HTTP_200_OK)
@@ -102,7 +104,6 @@ def deactivate_user(session: SessionDep, current_user: User = Depends(get_curren
         current_user.deleted_at = utc_now()
         revoke_all_refresh_tokens(current_user.id, session)
         session.commit()
-
 
 
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)

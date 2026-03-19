@@ -21,9 +21,9 @@ class UserRead(SQLModel):
     updated_at: Optional[datetime] = None
 
 class UserUpdate(SQLModel):
-    first_name: Optional[str] = Field(min_length=1, max_length=50)
-    last_name: Optional[str] = Field(min_length=1, max_length=50)
-    birth_date: Optional[date]
+    first_name: Optional[str] = Field(default=None, min_length=1, max_length=50)
+    last_name: Optional[str] = Field(default=None, min_length=1, max_length=50)
+    birth_date: Optional[date] = None
 
     model_config = {
         "extra": "forbid"
