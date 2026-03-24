@@ -79,7 +79,7 @@ def login_user(client):
 
     return _login_user
 
-# Para test simple utilizado en auths
+# Para tests simples
 @pytest.fixture(name="user_login")
 def user_login(create_user, login_user):
     user = create_user("test@gmail.com")
@@ -92,10 +92,10 @@ def user_login(create_user, login_user):
 
 @pytest.fixture
 def create_subject(client):
-    def _create_subject(token, data):
+    def _create_subject(token, name="Materia 1", data=None):
         if not data:
             data = {
-                "name": "Materia 1",
+                "name": name,
                 "description": "Materia de ejemplo",
                 "difficulty": DifficultyLevel.MEDIUM,
             }

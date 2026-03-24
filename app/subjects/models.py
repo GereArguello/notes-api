@@ -1,5 +1,5 @@
-from sqlmodel import SQLModel, Field, Relationship, Column
-from sqlalchemy import String, UniqueConstraint
+from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import UniqueConstraint
 from typing import TYPE_CHECKING
 from datetime import datetime
 from app.utils import utc_now
@@ -28,3 +28,7 @@ class Subject(SQLModel, table=True):
     last_viewed_at: datetime | None = Field(default=None)
 
     owner: "User" = Relationship(back_populates="subjects")
+
+    @property
+    def difficulty_label(self):
+        return self.difficulty.label
