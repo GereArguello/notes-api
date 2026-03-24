@@ -20,9 +20,8 @@ def test_should_return_401_if_token_is_malformed(client):
     )
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-def test_token_allows_access_to_protected_endpoint(user_login):
+def test_token_allows_access_to_protected_endpoint(client, user_login):
     token = user_login["access_token"]
-    client = user_login["client"]
 
     response = client.get(
         "/users/me",
@@ -31,12 +30,11 @@ def test_token_allows_access_to_protected_endpoint(user_login):
 
     assert response.status_code == status.HTTP_200_OK
 
-def test_should_return_401_if_token_expired(client, created_user, session):
-    customer_email = created_user["email"]
-    user = session.exec(select(User).where(User.email == customer_email)).first()
+def test_should_return_401_if_token_expired(client, create_user):
+    user = create_user("test@example.com")
 
     token = create_access_token(
-        data={"sub": str(user.id)},
+        data={"sub": str(user["id"])},
         expires_delta=timedelta(minutes=-1)
     )
 
@@ -53,8 +51,7 @@ def test_should_return_401_if_token_expired(client, created_user, session):
 
 #----- TESTS PARA TOKEN DE REFRESCO -----#
     
-def test_refresh_returns_new_tokens(user_login):
-    client = user_login["client"]
+def test_refresh_returns_new_tokens(client, user_login):
 
     response = client.post(
         "/auth/refresh",
@@ -67,25 +64,23 @@ def test_refresh_returns_new_tokens(user_login):
     assert "access_token" in body
     assert body["token_type"] == "bearer"
 
-def test_refresh_fails_if_token_expired(client, created_user, session):
-    user = session.exec(
-        select(User).where(User.email == created_user["email"])
-    ).first()
+def test_refresh_fails_if_token_expired(client, create_user):
+    user = create_user("test@example.com")
 
     expired_token = create_refresh_token(
-        data={"sub": str(user.id), "type": "refresh"},
+        data={"sub": str(user["id"]), "type": "refresh"},
         expires_delta=timedelta(minutes=-1)
     )
+    
+    client.cookies.set("refresh_token", expired_token)
 
     response = client.post(
         "/auth/refresh",
-        json={"refresh_token": expired_token}
     )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-def test_refresh_fails_if_token_is_not_refresh(client, user_login):
-    client = user_login["client"]
+def test_refresh_fails_if_token_is_invalid(client, user_login):
     client.cookies.set("refresh_token", "fake_token")
 
     response = client.post(
@@ -94,8 +89,7 @@ def test_refresh_fails_if_token_is_not_refresh(client, user_login):
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-def test_refresh_token_cannot_be_reused(user_login):
-    client = user_login["client"]
+def test_refresh_token_cannot_be_reused(client, user_login):
     # primer uso (válido)
     response1 = client.post(
         "/auth/refresh",

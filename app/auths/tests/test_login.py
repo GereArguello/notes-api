@@ -1,6 +1,7 @@
 from fastapi import status
 
-def test_user_can_login(client, created_user):
+def test_user_can_login(client, create_user):
+    created_user = create_user("user@gmail.com")
     response = client.post(
         "/auth/login",
         data = {
@@ -14,7 +15,8 @@ def test_user_can_login(client, created_user):
     assert "access_token" in body
     assert body["token_type"] == "bearer"
 
-def test_login_should_fail_if_credentials_are_invalid(client, created_user):
+def test_login_should_fail_if_credentials_are_invalid(client, create_user):
+    created_user = create_user("user@gmail.com")
     response = client.post(
         "/auth/login",
         data={

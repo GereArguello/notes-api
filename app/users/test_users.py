@@ -15,11 +15,12 @@ def test_should_fail_if_passwords_dont_match(client):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
     assert response.json()["detail"] == "Las contraseñas no coinciden"
 
-def test_should_fail_if_email_already_exists(client, created_user):
+def test_should_fail_if_email_already_exists(client, create_user):
+    user = create_user("test@example.com")
     data = {
         "first_name": "Pepe",
         "last_name": "Sanchez",
-        "email": created_user["email"],
+        "email": user["email"],
         "password": "12345678",
         "password2": "12345678"
     }

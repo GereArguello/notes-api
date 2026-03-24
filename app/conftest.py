@@ -6,6 +6,7 @@ from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, Session
 from app.core.database import get_session
 from app.core.config import settings
+from app.core.enums import DifficultyLevel
 from app.main import app
 
 sqlite_url = "sqlite:///:memory:"
@@ -37,36 +38,75 @@ def client_fixture(session: Session):
     yield client
     app.dependency_overrides.clear()
 
-@pytest.fixture(name="created_user")
-def created_user(client):
-    password = "password123"
 
-    payload = {
-        "first_name": "Pedro",
-        "last_name": "Sanchez",
-        "email": "Pedro@gmail.com",
-        "password": password,
-        "password2": password
-    }
+#Fixtures desacoplados: retornan funciones para luego poder variar con los datos
 
-    response = client.post("/users", json=payload)
-    assert response.status_code == status.HTTP_201_CREATED
+@pytest.fixture
+def create_user(client):
+    def _create_user(email: str):
+        password = "password123"
 
-    data = response.json()
-    data["raw_password"] = password
-    return data
-
-@pytest.fixture(name="user_login")
-def user_login(client, created_user):
-    response = client.post(
-        "/auth/login",
-        data={
-            "username": created_user["email"],
-            "password": created_user["raw_password"]
+        payload = {
+            "first_name": "Pedro",
+            "last_name": "Sanchez",
+            "email": email,
+            "password": password,
+            "password2": password
         }
-    )
-    assert response.status_code == 200
+
+        response = client.post("/users", json=payload)
+        assert response.status_code == status.HTTP_201_CREATED
+
+        data = response.json()
+        data["raw_password"] = password
+        return data
+
+    return _create_user
+
+@pytest.fixture
+def login_user(client):
+    def _login_user(email: str, password: str):
+        response = client.post(
+            "/auth/login",
+            data={
+                "username": email,
+                "password": password
+            }
+        )
+        assert response.status_code == status.HTTP_200_OK
+
+        return response.json()["access_token"]
+
+    return _login_user
+
+# Para test simple utilizado en auths
+@pytest.fixture(name="user_login")
+def user_login(create_user, login_user):
+    user = create_user("test@gmail.com")
+    token = login_user(user["email"], user["raw_password"])
+
     return {
-        "client": client,
-        "access_token": response.json()["access_token"]
+        "access_token": token,
+        "user": user
     }
+
+@pytest.fixture
+def create_subject(client):
+    def _create_subject(token, data):
+        if not data:
+            data = {
+                "name": "Materia 1",
+                "description": "Materia de ejemplo",
+                "difficulty": DifficultyLevel.MEDIUM,
+            }
+
+        response = client.post(
+            "/subjects",
+            headers={"Authorization": f"Bearer {token}"},
+            json=data
+        )
+
+        assert response.status_code == status.HTTP_201_CREATED
+        return response.json()
+
+    return _create_subject
