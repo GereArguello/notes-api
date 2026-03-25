@@ -59,3 +59,22 @@ def list_subjects(
         qs = qs.order_by(desc(Subject.created_at))
 
     return paginate(session, qs, params)
+
+@router.get("/{subj_id}", response_model=SubjectRead, status_code=status.HTTP_200_OK)
+def read_subject(
+    session: SessionDep,
+    subj_id: int,
+    current_user: User = Depends(get_current_user)
+):
+    subject = session.exec(
+        select(Subject)
+        .where(Subject.id == subj_id, Subject.owner_id == current_user.id)
+    ).first()
+
+    if not subject:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="La materia no existe"
+        )
+    
+    return subject
