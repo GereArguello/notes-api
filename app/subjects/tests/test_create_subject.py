@@ -34,13 +34,13 @@ def test_should_return_401_if_not_authenticated(client):
 def test_should_return_409_if_subject_name_already_exists(client, user_login, create_subject):
     token = user_login["access_token"]
 
-    response_1 = create_subject(token, None)
-
     data = {
         "name": "Materia 1",
         "description": "Materia de ejemplo",
         "difficulty": DifficultyLevel.MEDIUM
     }
+
+    response_1 = create_subject(token, data=data)
 
     response_2 = client.post(
         "/subjects",
@@ -81,8 +81,8 @@ def test_should_allow_same_subject_name_for_different_users(
         "difficulty": DifficultyLevel.MEDIUM
     }
 
-    res1 = create_subject(token1, data)
-    res2 = create_subject(token2, data)
+    res1 = create_subject(token1, data=data)
+    res2 = create_subject(token2, data=data)
 
     assert res1["name"] == res2["name"]
     assert res1["owner_id"] != res2["owner_id"]

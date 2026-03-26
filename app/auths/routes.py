@@ -7,9 +7,9 @@ from app.core.database import  SessionDep
 from app.core.security import decode_token
 from app.auths.service import (authenticate_user,
                                generate_auth_tokens,
-                               is_token_revoked,
+                               get_refresh_token,
+                               is_token_usable,
                                revoke_refresh_token,
-                               is_refresh_token_in_db,
                                new_refresh_token_db)
 from app.auths.schemas import Token
 from app.users.models import User
@@ -79,22 +79,9 @@ def refresh_token(
             status_code=401,
             detail="Token inválido"
         )
-    
-    if not is_refresh_token_in_db(refresh_token, session):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido"
-        )
-
-    if is_token_revoked(refresh_token, session):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido"
-        )
 
     payload = decode_token(refresh_token)
 
-    
     if payload.get("type") != "refresh":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -108,6 +95,27 @@ def refresh_token(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido"
         )
+
+    token_db = get_refresh_token(refresh_token, session)
+
+    if not token_db:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido"
+        )
+
+    if token_db.user_id != int(user_id):
+       raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido"
+        )
+
+    if not is_token_usable(token_db):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido"
+        )
+
     
     user = session.get(User, int(user_id))
 
@@ -118,7 +126,7 @@ def refresh_token(
         )
 
     # revocar token viejo
-    revoke_refresh_token(refresh_token, session)
+    revoke_refresh_token(token_db, session)
 
     # generar nuevos
     new_access_token, new_refresh_token = generate_auth_tokens(user.id)
@@ -158,26 +166,36 @@ def logout(
             detail="Token inválido"
         )
 
-    if not is_refresh_token_in_db(refresh_token, session):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido"
-        )
-
-    if is_token_revoked(refresh_token, session):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token inválido"
-        )
-
     payload = decode_token(refresh_token)
     
     if payload.get("type") != "refresh":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                             detail = "Token inválido")
 
-    # revocar token 
-    revoke_refresh_token(refresh_token, session)
+    user_id = payload.get("sub")
+
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido"
+        )
+    
+    token_db = get_refresh_token(refresh_token, session)
+
+    if not token_db:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido"
+        )
+
+    if token_db.user_id != int(user_id):
+       raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token inválido"
+        )
+
+    if token_db.revoked_at is None:
+        revoke_refresh_token(token_db, session)
 
     response.delete_cookie(
         key="refresh_token",

@@ -1,8 +1,7 @@
 from fastapi import status
-from sqlmodel import select
 from datetime import timedelta
 from app.core.security import create_access_token, create_refresh_token
-from app.users.models import User
+import time
 
 #----- TESTS PARA TOKEN DE ACCESO -----#
 def test_should_fail_if_token_is_missing(client):
@@ -90,15 +89,22 @@ def test_refresh_fails_if_token_is_invalid(client, user_login):
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 def test_refresh_token_cannot_be_reused(client, user_login):
-    # primer uso (válido)
-    response1 = client.post(
-        "/auth/refresh",
-    )
+    # primer uso
+    response1 = client.post("/auth/refresh")
     assert response1.status_code == status.HTTP_200_OK
 
-    # segundo uso (debería fallar)
-    response2 = client.post(
-        "/auth/refresh",
-    )
+    # esperar a que pase el grace period
+    time.sleep(3)
 
+    # segundo uso → ahora sí debe fallar
+    response2 = client.post("/auth/refresh")
     assert response2.status_code == status.HTTP_401_UNAUTHORIZED
+
+def test_refresh_token_allows_reuse_within_grace_period(client, user_login):
+    # primer refresh
+    response1 = client.post("/auth/refresh")
+    assert response1.status_code == status.HTTP_200_OK
+
+    # segundo inmediato → permitido
+    response2 = client.post("/auth/refresh")
+    assert response2.status_code == status.HTTP_200_OK

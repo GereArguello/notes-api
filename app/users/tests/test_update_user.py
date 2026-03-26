@@ -1,4 +1,5 @@
 from fastapi import status
+import time
 
 def test_update_user_success(client, user_login):
     token = user_login["access_token"]
@@ -126,6 +127,8 @@ def test_update_password_should_revoke_all_refresh_tokens(client, user_login):
     )
 
     assert response.status_code == status.HTTP_200_OK
+
+    time.sleep(3)
 
     # Intentar usar refresh token viejo -> debe fallar
     response_refresh = client.post(

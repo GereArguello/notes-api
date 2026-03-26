@@ -6,7 +6,10 @@ from app.core.security import (verify_password,
                                create_refresh_token)
 from app.core.config import settings
 from app.core.database import SessionDep
-from datetime import timedelta
+from app.utils import utc_now
+from datetime import timedelta, timezone
+
+GRACE_PERIOD = timedelta(seconds=2)
 
 def get_user_by_email(session: Session, email: str) -> User | None:
     return session.exec(select(User).where(User.email == email)).first()
@@ -38,38 +41,38 @@ def generate_auth_tokens(user_id: int):
     )
     return access_token, refresh_token
 
-def is_token_revoked(refresh_token: str, session: SessionDep) -> bool:
-    token = session.exec(
-        select(RefreshToken).where(
-            (RefreshToken.token == refresh_token) &
-            (RefreshToken.revoked == True)
-        )
-    ).first()
-
-    return token is not None
-
-def revoke_refresh_token(refresh_token, session: SessionDep) -> RefreshToken | None:
-    token = session.exec(
-        select(RefreshToken).where(RefreshToken.token == refresh_token)
-    ).first()
-    
-    if not token:
-        return None
-    
-    token.revoked = True
-    session.add(token)
-    session.commit()
-
-    return token
-
-def is_refresh_token_in_db(refresh_token: str, session: SessionDep) -> bool:
-    token_in_db = session.exec(
+def get_refresh_token(refresh_token: str, session: SessionDep) -> RefreshToken | None:
+    return session.exec(
         select(RefreshToken).where(
             RefreshToken.token == refresh_token
         )
     ).first()
 
-    return token_in_db is not None
+def is_token_revoked(token: RefreshToken) -> bool:
+    return token.revoked_at is not None
+
+def revoke_refresh_token(token: RefreshToken, session: SessionDep) ->  None:
+
+    token.revoked_at = utc_now()
+    session.add(token)
+    session.commit()
+
+
+def is_token_usable(token: RefreshToken) -> bool:
+    if token.revoked_at is None:
+        return True
+    
+    now = utc_now()
+
+    revoked_at = token.revoked_at
+
+    if revoked_at.tzinfo is None:
+        revoked_at = revoked_at.replace(tzinfo=timezone.utc)
+
+    if now - revoked_at < GRACE_PERIOD:
+        return True
+    
+    return False
 
 def new_refresh_token_db(user_id, new_refresh_token, expires_at, session: SessionDep) -> RefreshToken:
     refresh_token_db = RefreshToken(
@@ -80,5 +83,5 @@ def new_refresh_token_db(user_id, new_refresh_token, expires_at, session: Sessio
 
     session.add(refresh_token_db)
     session.commit()
-
+    session.refresh(refresh_token_db)
     return refresh_token_db
