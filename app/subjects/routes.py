@@ -6,7 +6,7 @@ from fastapi_pagination.ext.sqlmodel import paginate
 from fastapi_pagination import Page
 
 
-from app.subjects.schemas import SubjectRead, SubjectCreate
+from app.subjects.schemas import SubjectRead, SubjectCreate, SubjectUpdate
 from app.subjects.models import Subject
 from app.core.database import SessionDep
 from app.core.pagination import SubjectPagination
@@ -83,4 +83,40 @@ def read_subject(
     session.commit()
     session.refresh(subject)
     
+    return subject
+
+@router.patch("/{subj_id}", response_model=SubjectRead, status_code=status.HTTP_200_OK)
+def update_subject(
+    session: SessionDep,
+    subj_id: int,
+    subject_data: SubjectUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    subject = session.exec(
+        select(Subject).where(
+            Subject.id == subj_id,
+            Subject.owner_id == current_user.id
+        )
+    ).first()
+
+    if not subject:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="La materia no existe"
+        )
+    
+    updated_data = subject_data.model_dump(exclude_unset=True)
+
+    subject.sqlmodel_update(updated_data)
+
+    try:
+        session.add(subject)
+        session.commit()
+        session.refresh(subject)
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ya existe una materia con ese nombre"
+        )
     return subject

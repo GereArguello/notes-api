@@ -155,7 +155,7 @@ def test_read_subject_should_return_200(client, user_login, create_subject):
 
     assert (last_viewed_at - now) < timedelta(seconds=1)
 
-def test_should_return_404_if_subject_not_foundh(client, user_login, create_subject):
+def test_should_return_404_if_subject_not_found(client, user_login, create_subject):
     token = user_login["access_token"]
     subject = create_subject(token)
 
