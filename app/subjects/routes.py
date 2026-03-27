@@ -12,6 +12,7 @@ from app.core.database import SessionDep
 from app.core.pagination import SubjectPagination
 from app.auths.dependencies import get_current_user
 from app.users.models import User
+from app.utils import utc_now
 
 router = APIRouter(
     prefix="/subjects",
@@ -76,5 +77,10 @@ def read_subject(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="La materia no existe"
         )
+    
+    subject.last_viewed_at = utc_now()
+    session.add(subject)
+    session.commit()
+    session.refresh(subject)
     
     return subject

@@ -1,4 +1,6 @@
 from fastapi import status
+from app.utils import utc_now
+from datetime import datetime, timedelta, timezone
 
 
 ## TESTS PARA LISTA DE MATERIAS 
@@ -134,17 +136,24 @@ def test_read_subject_should_return_200(client, user_login, create_subject):
     token = user_login["access_token"]
     subject = create_subject(token)
 
+    now = utc_now()
+
     response = client.get(
         f"/subjects/{subject["id"]}",
         headers={"Authorization": f"Bearer {token}"}
     )
 
+
     assert response.status_code == status.HTTP_200_OK
 
     body = response.json()
+    last_viewed_at = datetime.fromisoformat(body["last_viewed_at"])
+    last_viewed_at = last_viewed_at.replace(tzinfo=timezone.utc)
 
     assert body["id"] == subject["id"]
     assert body["name"] == subject["name"]
+
+    assert (last_viewed_at - now) < timedelta(seconds=1)
 
 def test_should_return_404_if_subject_not_foundh(client, user_login, create_subject):
     token = user_login["access_token"]
