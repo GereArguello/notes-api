@@ -120,3 +120,27 @@ def update_subject(
             detail="Ya existe una materia con ese nombre"
         )
     return subject
+
+@router.delete("/{subj_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_subject(
+    session: SessionDep,
+    subj_id: int,
+    current_user: User = Depends(get_current_user)
+):
+    subject = session.exec(
+        select(Subject).where(
+            Subject.id == subj_id,
+            Subject.owner_id == current_user.id
+        )
+    ).first()
+
+    if not subject:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="La materia no existe"
+        )
+    
+    session.delete(subject)
+    session.commit()
+    
+    return None
