@@ -7,6 +7,7 @@ from app.core.enums import DifficultyLevel
 
 if TYPE_CHECKING:
     from app.users.models import User
+    from app.topics.models import Topic
 
 class Subject(SQLModel, table=True):
     __table_args__ = (
@@ -28,7 +29,8 @@ class Subject(SQLModel, table=True):
     last_viewed_at: datetime | None = Field(default=None)
 
     owner: "User" = Relationship(back_populates="subjects")
-
+    topics: list["Topic"] = Relationship(back_populates="subject")
+    
     @property
     def difficulty_label(self):
         return self.difficulty.label
