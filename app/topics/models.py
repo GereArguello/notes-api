@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from app.subjects.models import Subject
 
 class Topic(SQLModel, table=True):
-    __table__args__ = (
+    __table_args__ = (
         UniqueConstraint("subject_id", "name"),
         UniqueConstraint("subject_id", "sort_order"),
     )
@@ -23,7 +23,7 @@ class Topic(SQLModel, table=True):
     updated_at: datetime | None = Field(default=None,
                                  sa_column_kwargs={"onupdate": utc_now})
     
-    last_viewed_at: datetime = Field(default=None)
+    last_viewed_at: datetime | None = Field(default=None)
 
     subject: "Subject" = Relationship(back_populates="topics")
 
