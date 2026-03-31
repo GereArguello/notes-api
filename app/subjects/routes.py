@@ -8,6 +8,8 @@ from fastapi_pagination import Page
 
 from app.subjects.schemas import SubjectRead, SubjectCreate, SubjectUpdate
 from app.subjects.models import Subject
+from app.subjects.dependencies import get_user_subject
+
 from app.core.database import SessionDep
 from app.core.pagination import SubjectPagination
 from app.auths.dependencies import get_current_user
@@ -61,25 +63,14 @@ def list_subjects(
 
     return paginate(session, qs, params)
 
-@router.get("/{subj_id}", response_model=SubjectRead, status_code=status.HTTP_200_OK)
+@router.get("/{subject_id}", response_model=SubjectRead, status_code=status.HTTP_200_OK)
 def read_subject(
     session: SessionDep,
-    subj_id: int,
-    current_user: User = Depends(get_current_user)
+    subject: Subject = Depends(get_user_subject),
 ):
-    subject = session.exec(
-        select(Subject)
-        .where(Subject.id == subj_id, Subject.owner_id == current_user.id)
-    ).first()
 
-    if not subject:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="La materia no existe"
-        )
-    
     subject.last_viewed_at = utc_now()
-    session.add(subject)
+
     session.commit()
     session.refresh(subject)
     
