@@ -112,6 +112,20 @@ def create_subject(client):
     return _create_subject
 
 @pytest.fixture
+def create_topic(client):
+    def _create_topic(token, subject_id, name):
+        response = client.post(
+            f"/subjects/{subject_id}/topics",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"name": name}
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+
+        return response.json() 
+    return _create_topic        
+        
+
+@pytest.fixture
 def user_with_subject(user_login, create_subject):
     token = user_login["access_token"]
     subject = create_subject(token)
@@ -122,23 +136,14 @@ def user_with_subject(user_login, create_subject):
     }
 
 @pytest.fixture
-def user_with_topic(client, user_with_subject):
+def user_with_topic(client, user_with_subject, create_topic):
     token = user_with_subject["access_token"]
-    subject_id = user_with_subject["subject"]["id"]
+    subject = user_with_subject["subject"]
 
-    data = {
-        "name": "topic nuevo"
-    }
-
-    response = client.post(
-        f"/subjects/{subject_id}/topics",
-        headers={"Authorization": f"Bearer {token}"},
-        json=data
-    )
-    assert response.status_code == status.HTTP_201_CREATED
+    topic = create_topic(token, subject["id"], name="topic nuevo")
 
     return {
         "access_token": token,
-        "subject": user_with_subject["subject"],
-        "topic": response.json()
+        "subject": subject,
+        "topic": topic
     }

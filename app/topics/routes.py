@@ -91,8 +91,8 @@ def list_topics(
 @router.get("/subjects/{subject_id}/topics/{topic_id}", response_model=TopicRead, status_code=status.HTTP_200_OK)
 def read_topic(
     topic_id: int,
+    session: SessionDep,
     subject: Subject = Depends(get_user_subject),
-    session: SessionDep = Depends(),
 ):
 
     topic = session.exec(
