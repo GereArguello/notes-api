@@ -14,3 +14,6 @@ class TopicRead(SQLModel):
     created_at: datetime
     updated_at: datetime | None
     last_viewed_at: datetime | None
+
+class TopicUpdate(SQLModel):
+    name: str | None = Field(default=None, min_length=1, max_length=200)

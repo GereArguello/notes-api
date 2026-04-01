@@ -13,8 +13,8 @@ from app.users.models import User
 from app.subjects.models import Subject
 from app.subjects.dependencies import get_user_subject
 from app.topics.models import Topic
-from app.topics.schemas import TopicCreate, TopicRead
-from app.topics.services import existing_topic
+from app.topics.schemas import TopicCreate, TopicRead, TopicUpdate
+from app.topics.services import existing_topic, get_topic_or_404
 
 from app.utils import utc_now
 
@@ -95,19 +95,46 @@ def read_topic(
     subject: Subject = Depends(get_user_subject),
 ):
 
-    topic = session.exec(
-        select(Topic)
-        .where(Topic.id == topic_id,
-               Topic.subject_id == subject.id)
-    ).first()
+    topic = get_topic_or_404(session, subject, topic_id)
 
-    if not topic:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="El tema no existe")
-    
     topic.last_viewed_at = utc_now()
 
     session.commit()
     session.refresh(topic)
 
+    return topic
+
+@router.patch("/subjects/{subject_id}/topics/{topic_id}", response_model=TopicRead, status_code=status.HTTP_200_OK)
+def update_topic(
+    topic_id: int,
+    session: SessionDep,
+    topic_data: TopicUpdate,
+    subject: Subject = Depends(get_user_subject),
+):
+
+    topic = get_topic_or_404(session, subject, topic_id)
+
+    update_data = topic_data.model_dump(exclude_unset=True)
+
+    if not update_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No hay datos para actualizar"
+        )
+
+    if "name" in update_data and topic.name == update_data["name"]:
+        return topic
+    
+    topic.sqlmodel_update(update_data)
+
+    try:
+        session.add(topic)
+        session.commit()
+        session.refresh(topic)
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ya existe un tema con este nombre"
+        )
     return topic

@@ -96,9 +96,12 @@ def update_subject(
             detail="La materia no existe"
         )
     
-    updated_data = subject_data.model_dump(exclude_unset=True)
+    update_data = subject_data.model_dump(exclude_unset=True)
 
-    subject.sqlmodel_update(updated_data)
+    if "name" in update_data and subject.name == update_data["name"]:
+        return subject
+
+    subject.sqlmodel_update(update_data)
 
     try:
         session.add(subject)
