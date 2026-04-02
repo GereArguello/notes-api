@@ -1,7 +1,7 @@
 from fastapi import status
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, Session
 from app.core.database import get_session
@@ -16,6 +16,12 @@ engine = create_engine(
     connect_args={"check_same_thread": False},
     poolclass=StaticPool
 )
+
+@event.listens_for(engine, "connect")
+def enable_sqlite_fk(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("PRAGMA foreign_keys=ON")
+    cursor.close()
 
 @pytest.fixture(name="session")
 def session_fixture():

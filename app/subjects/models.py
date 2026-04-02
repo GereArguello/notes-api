@@ -29,7 +29,12 @@ class Subject(SQLModel, table=True):
     last_viewed_at: datetime | None = Field(default=None)
 
     owner: "User" = Relationship(back_populates="subjects")
-    topics: list["Topic"] = Relationship(back_populates="subject")
+    topics: list["Topic"] = Relationship(
+        back_populates="subject",
+        sa_relationship_kwargs={
+            "passive_deletes": True
+        }
+    )
     
     @property
     def difficulty_label(self):

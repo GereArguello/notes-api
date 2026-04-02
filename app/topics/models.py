@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, Column, ForeignKey
 from typing import TYPE_CHECKING
 from datetime import datetime
 from app.utils import utc_now
@@ -14,7 +14,14 @@ class Topic(SQLModel, table=True):
     )
 
     id: int | None = Field(default=None, primary_key=True)
-    subject_id: int = Field(foreign_key="subject.id", index=True)
+    
+    subject_id: int = Field(
+        sa_column=Column(
+            ForeignKey("subject.id", ondelete="CASCADE"),
+            nullable=False,
+            index=True
+        )
+    )
 
     name: str = Field(max_length=200, nullable=False)
     sort_order: int = Field(ge=1, nullable=False)
