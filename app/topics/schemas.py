@@ -17,3 +17,6 @@ class TopicRead(SQLModel):
 
 class TopicUpdate(SQLModel):
     name: str | None = Field(default=None, min_length=1, max_length=200)
+
+class TopicReOrder(SQLModel):
+    sort_order : int | None = Field(ge=1, default=None)

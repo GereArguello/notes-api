@@ -1,6 +1,5 @@
 from fastapi import APIRouter, status, Depends, HTTPException
 from sqlmodel import select
-from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 
 from fastapi_pagination.ext.sqlmodel import paginate
@@ -13,8 +12,13 @@ from app.users.models import User
 from app.subjects.models import Subject
 from app.subjects.dependencies import get_user_subject
 from app.topics.models import Topic
-from app.topics.schemas import TopicCreate, TopicRead, TopicUpdate
-from app.topics.services import existing_topic, get_topic_or_404
+from app.topics.schemas import TopicCreate, TopicRead, TopicUpdate, TopicReOrder
+from app.topics.services import (existing_topic,
+                                 get_topic_or_404,
+                                 get_max_order_or_0,
+                                 get_topics_to_reorder,
+                                 shift_down,
+                                 shift_up)
 
 from app.utils import utc_now
 
@@ -47,13 +51,10 @@ def create_topic(
     
     db_topic = Topic(**topic.model_dump(), subject_id=subject_id)
 
-    max_order = session.exec(
-        select(func.max(Topic.sort_order))
-        .where(Topic.subject_id == subject_id)
-    ).one()
+    max_order = get_max_order_or_0(session, subject_id)
 
-    db_topic.sort_order = (max_order or 0) + 1
-    print(db_topic)
+    db_topic.sort_order = max_order + 1
+
     try:
         session.add(db_topic)
         session.commit()
@@ -138,3 +139,63 @@ def update_topic(
             detail="Ya existe un tema con este nombre"
         )
     return topic
+
+@router.patch("/subjects/{subject_id}/topics/{topic_id}/re-order", response_model=TopicRead, status_code=status.HTTP_200_OK)
+def re_order_topic(
+    topic_id: int,
+    order_data: TopicReOrder,
+    session: SessionDep,
+    subject: Subject = Depends(get_user_subject),
+):
+    topic = get_topic_or_404(session, subject, topic_id)
+
+    new_order = order_data.model_dump(exclude_unset=True)
+
+    if not new_order:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No hay datos para actualizar"
+        )
+
+    new_sort_order = new_order["sort_order"]
+    
+    if topic.sort_order == new_sort_order:
+        return topic
+
+    last_topic = get_max_order_or_0(session, subject.id)
+
+    if new_sort_order > last_topic:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Número de orden fuera de rango"
+        )
+    
+    old_order = topic.sort_order
+
+    topics = get_topics_to_reorder(session, subject, old_order, new_sort_order)
+
+    try:
+        topic.sort_order = -1
+        session.add(topic)
+        session.flush()
+
+        if new_sort_order > old_order:
+            shift_down(session, topics)
+        else:
+            shift_up(session, topics)
+
+        topic.sort_order = new_sort_order
+        session.add(topic)
+        
+        session.commit()
+        session.refresh(topic)
+
+        return topic
+    except IntegrityError:
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Conflicto al reordenar los temas"
+        )
+    
+

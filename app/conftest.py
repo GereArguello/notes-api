@@ -147,3 +147,25 @@ def user_with_topic(client, user_with_subject, create_topic):
         "subject": subject,
         "topic": topic
     }
+
+@pytest.fixture
+def user_with_topics(client, user_with_subject, create_topic):
+    token = user_with_subject["access_token"]
+    subject = user_with_subject["subject"]
+    subject_id = user_with_subject["subject"]["id"]
+
+    for i in range(10):
+        create_topic(token, subject_id, name=f"Topic {i}")
+
+    response = client.get(
+        f"/subjects/{subject_id}/topics",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    topics = response.json()["items"]
+
+    return {
+        "access_token": token,
+        "subject": subject,
+        "topics": topics
+    }

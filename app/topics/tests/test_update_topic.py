@@ -95,3 +95,105 @@ def test_update_topic_should_not_modify_if_same_name(client, user_with_topic):
     body = response.json()
 
     assert body["name"] == topic_name
+
+
+## TESTS PARA REORDENAR TEMAS
+
+def test_reorder_topic_move_down(client, user_with_topics):
+    token = user_with_topics["access_token"]
+    subject_id = user_with_topics["subject"]["id"]
+    topics = user_with_topics["topics"]
+
+
+    topic_to_move = topics[1] #Sort_order = 2
+
+    response = client.patch(
+        f"/subjects/{subject_id}/topics/{topic_to_move['id']}/re-order",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"sort_order": 8}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    # Volver a pedir la lista
+    response = client.get(
+        f"/subjects/{subject_id}/topics",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    items = response.json()["items"]
+
+    orders = [t["sort_order"] for t in items]
+
+    assert orders == [i+1 for i in range(10)]  # siempre consistente
+    assert any(t["id"] == topic_to_move["id"] and t["sort_order"] == 8 for t in items)
+
+def test_reorder_topic_move_up(client, user_with_topics):
+    token = user_with_topics["access_token"]
+    subject_id = user_with_topics["subject"]["id"]
+    topics = user_with_topics["topics"]
+
+
+    topic_to_move = topics[7] #Sort_order = 8
+
+    response = client.patch(
+        f"/subjects/{subject_id}/topics/{topic_to_move['id']}/re-order",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"sort_order": 2}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+    # Volver a pedir la lista
+    response = client.get(
+        f"/subjects/{subject_id}/topics",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    items = response.json()["items"]
+
+    orders = [t["sort_order"] for t in items]
+
+    assert orders == [i+1 for i in range(10)]  # siempre consistente
+    assert any(t["id"] == topic_to_move["id"] and t["sort_order"] == 2 for t in items)
+
+def test_reorder_topic_same_position(client, user_with_topics):
+    token = user_with_topics["access_token"]
+    subject_id = user_with_topics["subject"]["id"]
+    topics = user_with_topics["topics"]
+
+    topic = topics[3]  
+
+    response = client.patch(
+        f"/subjects/{subject_id}/topics/{topic['id']}/re-order",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"sort_order": topic["sort_order"]}
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+    
+def test_reorder_topic_out_of_range_should_return_400(client, user_with_topics):
+    token = user_with_topics["access_token"]
+    subject_id = user_with_topics["subject"]["id"]
+    topics = user_with_topics["topics"]
+
+    topic = topics[0]  # cualquier topic válido
+
+    # Caso 1: menor que 1
+    response_low = client.patch(
+        f"/subjects/{subject_id}/topics/{topic['id']}/re-order",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"sort_order": 0}
+    )
+
+    assert response_low.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
+
+    # Caso 2: mayor al máximo
+    response_high = client.patch(
+        f"/subjects/{subject_id}/topics/{topic['id']}/re-order",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"sort_order": len(topics) + 1}
+    )
+
+    assert response_high.status_code == status.HTTP_400_BAD_REQUEST
+    assert response_high.json()["detail"] == "Número de orden fuera de rango"
