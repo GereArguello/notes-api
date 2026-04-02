@@ -198,4 +198,28 @@ def re_order_topic(
             detail="Conflicto al reordenar los temas"
         )
     
+@router.delete("/subjects/{subject_id}/topics/{topic_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_topic(
+    topic_id: int,
+    session: SessionDep,
+    subject: Subject = Depends(get_user_subject),
+):
+    topic = get_topic_or_404(session, subject, topic_id)
+
+    topics_to_update = session.exec(
+        select(Topic)
+        .where(
+            Topic.subject_id == subject.id,
+            Topic.sort_order > topic.sort_order
+        )
+    ).all()
+
+    session.delete(topic)
+    session.flush()
+
+    shift_down(session, topics_to_update)    
+
+    session.commit()
+
+    return None
 
