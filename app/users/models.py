@@ -28,4 +28,9 @@ class User(SQLModel, table=True):
 
     deleted_at: datetime | None = None
 
-    subjects: list["Subject"] = Relationship(back_populates="owner")
+    subjects: list["Subject"] = Relationship(
+        back_populates="owner",
+        sa_relationship_kwargs={
+            "passive_deletes": True
+        }
+    )

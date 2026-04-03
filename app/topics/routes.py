@@ -98,7 +98,10 @@ def read_topic(
 
     topic = get_topic_or_404(session, subject, topic_id)
 
-    topic.last_viewed_at = utc_now()
+    now = utc_now()
+
+    topic.last_viewed_at = now
+    topic.subject.last_viewed_at = now
 
     session.commit()
     session.refresh(topic)
