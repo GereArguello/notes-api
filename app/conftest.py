@@ -128,7 +128,20 @@ def create_topic(client):
         assert response.status_code == status.HTTP_201_CREATED
 
         return response.json() 
-    return _create_topic        
+    return _create_topic   
+
+@pytest.fixture
+def create_page(client):
+    def _create_page(token, subject_id, topic_id, title):
+        response = client.post(
+            f"/subjects/{subject_id}/topics/{topic_id}/pages",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"title": title}
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+
+        return response.json()
+    return _create_page
         
 
 @pytest.fixture
@@ -174,4 +187,19 @@ def user_with_topics(client, user_with_subject, create_topic):
         "access_token": token,
         "subject": subject,
         "topics": topics
+    }
+
+@pytest.fixture
+def user_with_page(user_with_topic, create_page):
+    token = user_with_topic["access_token"]
+    subject_id = user_with_topic["subject"]["id"]
+    topic_id = user_with_topic["topic"]["id"]
+
+    page = create_page(token, subject_id, topic_id, "Página 1")
+
+    return {
+        "access_token": token,
+        "subject": user_with_topic["subject"],
+        "topic": user_with_topic["topic"],
+        "page": page
     }
