@@ -13,7 +13,7 @@ router = APIRouter(tags=["pages"])
 
 
 @router.post(
-    "/subject/{subject_id}/topics/{topic_id}/pages",
+    "/subjects/{subject_id}/topics/{topic_id}/pages",
     response_model=PageRead, status_code=status.HTTP_201_CREATED
 )
 def create_page(
