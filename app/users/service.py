@@ -2,7 +2,7 @@ from sqlmodel import Session, update
 from app.users.models import User
 from app.auths.models import RefreshToken
 from app.core.security import get_password_hash
-from utils import utc_now
+from app.utils import utc_now
 
 def update_user_service(user: User, data: dict, session: Session):
     user.sqlmodel_update(data)

@@ -2,7 +2,7 @@ from sqlmodel import SQLModel, Field, Column, Relationship
 from typing import TYPE_CHECKING
 from sqlalchemy import String
 from datetime import date, datetime
-from utils import utc_now
+from app.utils import utc_now
 
 if TYPE_CHECKING:
     from app.subjects.models import Subject
