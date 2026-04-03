@@ -6,6 +6,7 @@ from app.utils import utc_now
 
 if TYPE_CHECKING:
     from app.subjects.models import Subject
+    from app.pages.models import Page
 
 class Topic(SQLModel, table=True):
     __table_args__ = (
@@ -33,4 +34,10 @@ class Topic(SQLModel, table=True):
     last_viewed_at: datetime | None = Field(default=None)
 
     subject: "Subject" = Relationship(back_populates="topics")
+
+    pages: list["Page"] = Relationship(
+        back_populates="topic",
+        sa_relationship_kwargs={
+            "passive_deletes": True
+        })
 
