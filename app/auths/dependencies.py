@@ -12,7 +12,7 @@ oauth2_scheme_optional = OAuth2PasswordBearer(
     auto_error=False
 )
 
-async def get_current_user(token: str = Depends(oauth2_scheme),session: Session = Depends(get_session)) -> User:
+def get_current_user(token: str = Depends(oauth2_scheme),session: Session = Depends(get_session)) -> User:
     payload = decode_token(token)
     user_id = payload.get("sub")
 

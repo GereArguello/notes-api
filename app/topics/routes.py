@@ -13,8 +13,7 @@ from app.subjects.models import Subject
 from app.subjects.dependencies import get_user_subject
 from app.topics.models import Topic
 from app.topics.schemas import TopicCreate, TopicRead, TopicUpdate, TopicReOrder
-from app.topics.services import (existing_topic,
-                                 get_topic_or_404,
+from app.topics.services import (get_topic_or_404,
                                  get_max_order_or_0,
                                  get_topics_to_reorder,
                                  shift_down,
@@ -40,14 +39,6 @@ def create_topic(
             detail="La materia no existe"
         )
 
-    # Validación previa
-    topic_exists = existing_topic(session, topic, subject_id)
-
-    if topic_exists:
-        raise HTTPException(
-            status_code=409,
-            detail="Ya existe un tema con este nombre"
-        )
     
     db_topic = Topic(**topic.model_dump(), subject_id=subject_id)
 
@@ -61,8 +52,8 @@ def create_topic(
     except IntegrityError:
         session.rollback()
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No se pudo crear el tema"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Ya existe un tema con este nombre"
         )
     session.refresh(db_topic)
 
