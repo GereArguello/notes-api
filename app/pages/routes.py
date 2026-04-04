@@ -162,9 +162,9 @@ def re_order_page(
         session.flush()
 
         if new_sort_order > old_order:
-            shift_items(session, pages, reverse=False)
+            shift_items(session, pages, move_up=True)
         else:
-            shift_items(session, pages, reverse=True)
+            shift_items(session, pages, move_up=False)
 
         page.sort_order = new_sort_order
         session.add(page)
@@ -179,3 +179,28 @@ def re_order_page(
             status_code=status.HTTP_409_CONFLICT,
             detail="Conflicto al reordenar las páginas"
         )
+
+@router.delete(
+    "/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}",
+    status_code=status.HTTP_204_NO_CONTENT
+)
+def delete_page(
+    session: SessionDep,
+    page: Page = Depends(get_user_page)
+): 
+    pages_to_update = (session.exec(
+        select(Page)
+        .where(
+            Page.topic_id == page.topic_id,
+            Page.sort_order > page.sort_order)
+        )
+    ).all()
+
+    session.delete(page)
+    session.flush()
+
+    shift_items(session, pages_to_update, move_up=True)
+
+    session.commit()
+
+    return None

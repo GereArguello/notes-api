@@ -7,11 +7,15 @@ def utc_now():
 def shift_items(
     session: SessionDep,
     items: list,
-    reverse: bool
+    move_up: bool
 ):
-    sorted_items = sorted(items, key=lambda x: x.sort_order, reverse=reverse)
-    delta = 1 if reverse else -1
-
+    if move_up:
+        sorted_items = sorted(items, key=lambda x: x.sort_order)
+        delta = -1
+    else:
+        sorted_items = sorted(items, key=lambda x: x.sort_order, reverse=True)
+        delta = 1
+        
     for item in sorted_items:
         item.sort_order += delta
         session.add(item)

@@ -143,9 +143,9 @@ def re_order_topic(
         session.flush()
 
         if new_sort_order > old_order:
-            shift_items(session, topics, reverse=False)
+            shift_items(session, topics, move_up=True)
         else:
-            shift_items(session, topics, reverse=True)
+            shift_items(session, topics, move_up=False)
 
         topic.sort_order = new_sort_order
         session.add(topic)
@@ -177,7 +177,7 @@ def delete_topic(
     session.delete(topic)
     session.flush()
 
-    shift_items(session, topics_to_update, reverse=False)    
+    shift_items(session, topics_to_update, move_up=True)    
 
     session.commit()
 
