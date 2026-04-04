@@ -203,3 +203,26 @@ def user_with_page(user_with_topic, create_page):
         "topic": user_with_topic["topic"],
         "page": page
     }
+
+@pytest.fixture
+def user_with_pages(client, user_with_topic, create_page):
+    token = user_with_topic["access_token"]
+    subject_id = user_with_topic["subject"]["id"]
+    topic_id = user_with_topic["topic"]["id"]
+
+    for i in range(5):
+        page = create_page(token, subject_id, topic_id, f"Página {i}")
+
+    response = client.get(
+        f"/subjects/{subject_id}/topics/{topic_id}/pages",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+
+    pages = response.json()["items"]
+
+    return {
+        "access_token": token,
+        "subject_id": subject_id,
+        "topic_id": topic_id,
+        "pages": pages
+    }
