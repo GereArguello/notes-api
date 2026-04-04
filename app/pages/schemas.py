@@ -20,3 +20,10 @@ class PageRead(SQLModel):
     created_at: datetime
     updated_at: datetime | None
     last_viewed_at: datetime | None
+
+class PageUpdate(SQLModel):
+    title: str | None = Field(default=None, min_length=1, max_length=200)
+    content: str | None = None
+
+class PageReOrder(SQLModel):
+    sort_order : int | None = Field(ge=1, default=None)

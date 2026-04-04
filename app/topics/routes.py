@@ -15,11 +15,9 @@ from app.topics.models import Topic
 from app.topics.schemas import TopicCreate, TopicRead, TopicUpdate, TopicReOrder
 from app.topics.services import (get_topic_or_404,
                                  get_max_order_or_0,
-                                 get_topics_to_reorder,
-                                 shift_down,
-                                 shift_up)
+                                 get_topics_to_reorder)
 
-from app.utils import utc_now
+from app.utils import utc_now, shift_items
 
 router = APIRouter(tags=["topics"])
 
@@ -143,15 +141,15 @@ def re_order_topic(
 ):
     topic = get_topic_or_404(session, subject, topic_id)
 
-    new_order = order_data.model_dump(exclude_unset=True)
+    data = order_data.model_dump(exclude_unset=True)
 
-    if not new_order:
+    if not data:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No hay datos para actualizar"
         )
 
-    new_sort_order = new_order["sort_order"]
+    new_sort_order = data["sort_order"]
     
     if topic.sort_order == new_sort_order:
         return topic
@@ -174,9 +172,9 @@ def re_order_topic(
         session.flush()
 
         if new_sort_order > old_order:
-            shift_down(session, topics)
+            shift_items(session, topics, reverse=False)
         else:
-            shift_up(session, topics)
+            shift_items(session, topics, reverse=True)
 
         topic.sort_order = new_sort_order
         session.add(topic)

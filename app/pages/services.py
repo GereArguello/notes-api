@@ -26,3 +26,27 @@ def get_page_or_404(session: SessionDep, page_id: int, topic: Topic):
             detail="Página no encontrada"
         )
     return page
+
+def get_pages_to_reorder(
+    session: SessionDep,
+    topic_id: int,
+    old_order: int,
+    new_order: int
+) -> list[Page]:
+
+    if new_order > old_order:
+        return session.exec(
+            select(Page).where(
+                Page.topic_id == topic_id,
+                Page.sort_order > old_order,
+                Page.sort_order <= new_order
+            )
+        ).all()
+
+    return session.exec(
+        select(Page).where(
+            Page.topic_id == topic_id,
+            Page.sort_order >= new_order,
+            Page.sort_order < old_order
+        )
+    ).all()

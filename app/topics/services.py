@@ -62,17 +62,4 @@ def get_topics_to_reorder(
         )
     ).all()
 
-def shift_down(session: SessionDep, topics: list[Topic]):
-        for t in sorted(topics, key=lambda t: t.sort_order):
-            t.sort_order -= 1
-            session.add(t)
-            session.flush()
-        
-    
-def shift_up(session: SessionDep, topics: list[Topic]):       
-        for t in sorted(topics, key=lambda t: t.sort_order, reverse=True):
-            t.sort_order += 1
-            session.add(t)
-            session.flush()
-        
 
