@@ -40,7 +40,7 @@ def get_max_order_or_0(session: SessionDep, subject_id: int):
 
 def get_topics_to_reorder(
     session: SessionDep,
-    subject: Subject,
+    subject_id: int,
     old_order: int,
     new_order: int
 ) -> list[Topic]:
@@ -48,7 +48,7 @@ def get_topics_to_reorder(
     if new_order > old_order:
         return session.exec(
             select(Topic).where(
-                Topic.subject_id == subject.id,
+                Topic.subject_id == subject_id,
                 Topic.sort_order > old_order,
                 Topic.sort_order <= new_order
             )
@@ -56,7 +56,7 @@ def get_topics_to_reorder(
 
     return session.exec(
         select(Topic).where(
-            Topic.subject_id == subject.id,
+            Topic.subject_id == subject_id,
             Topic.sort_order >= new_order,
             Topic.sort_order < old_order
         )

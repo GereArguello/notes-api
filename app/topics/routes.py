@@ -7,15 +7,13 @@ from fastapi_pagination import Page
 
 from app.core.database import SessionDep
 from app.core.pagination import TopicPagination
-from app.auths.dependencies import get_current_user
-from app.users.models import User
 from app.subjects.models import Subject
 from app.subjects.dependencies import get_user_subject
+from app.topics.dependencies import get_user_topic
 from app.topics.models import Topic
 from app.topics.schemas import TopicCreate, TopicRead, TopicUpdate, TopicReOrder
-from app.topics.services import (get_topic_or_404,
-                                 get_max_order_or_0,
-                                 get_topics_to_reorder)
+from app.topics.services import (get_max_order_or_0,
+                                get_topics_to_reorder)
 
 from app.utils import utc_now, shift_items
 
@@ -24,23 +22,13 @@ router = APIRouter(tags=["topics"])
 
 @router.post("/subjects/{subject_id}/topics", response_model=TopicRead, status_code=status.HTTP_201_CREATED)
 def create_topic(
-    subject_id: int,
     topic: TopicCreate,
     session: SessionDep,
-    current_user: User = Depends(get_current_user)
+    subject: Subject = Depends(get_user_subject)
 ):
-    subject = session.get(Subject, subject_id)
+    db_topic = Topic(**topic.model_dump(), subject_id=subject.id)
 
-    if not subject or subject.owner_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="La materia no existe"
-        )
-
-    
-    db_topic = Topic(**topic.model_dump(), subject_id=subject_id)
-
-    max_order = get_max_order_or_0(session, subject_id)
+    max_order = get_max_order_or_0(session, subject.id)
 
     db_topic.sort_order = max_order + 1
 
@@ -59,20 +47,14 @@ def create_topic(
 
 @router.get("/subjects/{subject_id}/topics", response_model=Page[TopicRead], status_code=status.HTTP_200_OK)
 def list_topics(
-    subject_id: int,
     session: SessionDep,
-    current_user: User = Depends(get_current_user),
+    subject: Subject = Depends(get_user_subject),
     params: TopicPagination = Depends()
 ):
-    subject = session.get(Subject, subject_id)
-
-    if not subject or subject.owner_id != current_user.id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="La materia no existe")
     
     qs = (
         select(Topic)
-        .where(Topic.subject_id == subject_id)
+        .where(Topic.subject_id == subject.id)
         .order_by(Topic.sort_order)
     )
 
@@ -80,13 +62,9 @@ def list_topics(
 
 @router.get("/subjects/{subject_id}/topics/{topic_id}", response_model=TopicRead, status_code=status.HTTP_200_OK)
 def read_topic(
-    topic_id: int,
     session: SessionDep,
-    subject: Subject = Depends(get_user_subject),
+    topic: Topic = Depends(get_user_topic),
 ):
-
-    topic = get_topic_or_404(session, subject, topic_id)
-
     now = utc_now()
 
     topic.last_viewed_at = now
@@ -99,14 +77,10 @@ def read_topic(
 
 @router.patch("/subjects/{subject_id}/topics/{topic_id}", response_model=TopicRead, status_code=status.HTTP_200_OK)
 def update_topic(
-    topic_id: int,
     session: SessionDep,
     topic_data: TopicUpdate,
-    subject: Subject = Depends(get_user_subject),
+    topic: Topic = Depends(get_user_topic),
 ):
-
-    topic = get_topic_or_404(session, subject, topic_id)
-
     update_data = topic_data.model_dump(exclude_unset=True)
 
     if not update_data:
@@ -134,13 +108,10 @@ def update_topic(
 
 @router.patch("/subjects/{subject_id}/topics/{topic_id}/re-order", response_model=TopicRead, status_code=status.HTTP_200_OK)
 def re_order_topic(
-    topic_id: int,
     order_data: TopicReOrder,
     session: SessionDep,
-    subject: Subject = Depends(get_user_subject),
+    topic: Topic = Depends(get_user_topic),
 ):
-    topic = get_topic_or_404(session, subject, topic_id)
-
     data = order_data.model_dump(exclude_unset=True)
 
     if not data:
@@ -154,7 +125,7 @@ def re_order_topic(
     if topic.sort_order == new_sort_order:
         return topic
 
-    last_topic = get_max_order_or_0(session, subject.id)
+    last_topic = get_max_order_or_0(session, topic.subject_id)
 
     if new_sort_order > last_topic:
         raise HTTPException(
@@ -164,7 +135,7 @@ def re_order_topic(
     
     old_order = topic.sort_order
 
-    topics = get_topics_to_reorder(session, subject, old_order, new_sort_order)
+    topics = get_topics_to_reorder(session, topic.subject_id, old_order, new_sort_order)
 
     try:
         topic.sort_order = -1
@@ -192,16 +163,13 @@ def re_order_topic(
     
 @router.delete("/subjects/{subject_id}/topics/{topic_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_topic(
-    topic_id: int,
     session: SessionDep,
-    subject: Subject = Depends(get_user_subject),
+    topic: Topic = Depends(get_user_topic),
 ):
-    topic = get_topic_or_404(session, subject, topic_id)
-
     topics_to_update = session.exec(
         select(Topic)
         .where(
-            Topic.subject_id == subject.id,
+            Topic.subject_id == topic.subject_id,
             Topic.sort_order > topic.sort_order
         )
     ).all()
@@ -209,7 +177,7 @@ def delete_topic(
     session.delete(topic)
     session.flush()
 
-    shift_down(session, topics_to_update)    
+    shift_items(session, topics_to_update, reverse=False)    
 
     session.commit()
 
