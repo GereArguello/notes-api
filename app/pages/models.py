@@ -5,8 +5,12 @@ from typing import TYPE_CHECKING
 from datetime import datetime
 from app.utils import utc_now
 
+from app.page_tags.models import PageTagLink
+
 if TYPE_CHECKING:
     from app.topics.models import Topic
+    from app.tags.models import Tag
+
 
 class Page(SQLModel, table=True):
     __table_args__ = (
@@ -39,3 +43,7 @@ class Page(SQLModel, table=True):
 
     topic: "Topic" = Relationship(back_populates="pages")
 
+    tags: list["Tag"] = Relationship(
+        back_populates="pages",
+        link_model=PageTagLink
+    )

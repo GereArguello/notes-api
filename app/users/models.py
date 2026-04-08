@@ -6,6 +6,7 @@ from app.utils import utc_now
 
 if TYPE_CHECKING:
     from app.subjects.models import Subject
+    from app.tags.models import Tag
 
 class User(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
@@ -29,6 +30,12 @@ class User(SQLModel, table=True):
     deleted_at: datetime | None = None
 
     subjects: list["Subject"] = Relationship(
+        back_populates="owner",
+        sa_relationship_kwargs={
+            "passive_deletes": True
+        }
+    )
+    tags: list["Tag"] = Relationship(
         back_populates="owner",
         sa_relationship_kwargs={
             "passive_deletes": True
