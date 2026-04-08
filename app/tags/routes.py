@@ -15,7 +15,51 @@ from app.page_tags.models import PageTagLink
 
 router = APIRouter(tags=["tags"])
 
-@router.post("/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}/tags", response_model=TagRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}/tags",
+    response_model=TagRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Agregar tag a página",
+    description="""
+Crea o reutiliza un tag y lo asocia a una página del usuario autenticado.
+
+### Flujo
+- Valida el usuario autenticado
+- Verifica que la materia, tema y página pertenezcan al usuario
+- Normaliza el nombre del tag (trim + lowercase)
+- Busca el tag existente o lo crea
+- Asocia el tag a la página
+- Persiste los cambios
+- Retorna el tag
+
+### Autenticación requerida
+- Header: `Authorization: Bearer <access_token>`
+
+### Path params
+- `subject_id`: ID de la materia
+- `topic_id`: ID del tema
+- `page_id`: ID de la página
+
+### Body
+{
+  "name": "backend"
+}
+
+### Notas
+- Los tags son únicos por usuario
+- Se reutilizan si ya existen
+- La relación página-tag evita duplicados
+
+### Resultado
+Retorna el tag asociado
+""",
+    responses={
+        201: {"description": "Tag creado/asociado correctamente"},
+        401: {"description": "No autenticado o token inválido"},
+        404: {"description": "Página, tema o materia no encontrada"},
+        409: {"description": "El tag ya está asociado a la página"}
+    }
+)
 def create_tag(
     data: TagCreate,
     session: SessionDep,
@@ -32,7 +76,40 @@ def create_tag(
 
     return tag
 
-@router.get("/tags", response_model=list[TagRead])
+@router.get(
+    "/tags",
+    response_model=list[TagRead],
+    status_code=status.HTTP_200_OK,
+    summary="Listar tags",
+    description="""
+Retorna todos los tags del usuario autenticado, con opción de búsqueda.
+
+### Flujo
+- Valida el usuario autenticado
+- Obtiene los tags asociados al usuario
+- Aplica filtro opcional por nombre (`search`)
+- Ordena alfabéticamente
+- Retorna la lista de tags
+
+### Autenticación requerida
+- Header: `Authorization: Bearer <access_token>`
+
+### Query params
+- `search`: filtro opcional por nombre (case-insensitive parcial)
+
+### Notas
+- Solo retorna tags del usuario autenticado
+- El filtro busca coincidencias parciales en el nombre
+- Los resultados se ordenan por nombre
+
+### Resultado
+Retorna una lista de tags
+""",
+    responses={
+        200: {"description": "Listado de tags obtenido correctamente"},
+        401: {"description": "No autenticado o token inválido"}
+    }
+)
 def list_tags(
     session: SessionDep,
     search: str | None = None,
@@ -47,7 +124,42 @@ def list_tags(
 
     return session.exec(query).all()
 
-@router.delete("/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}/tags/{tag_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}/tags/{tag_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Eliminar tag de página",
+    description="""
+Elimina la asociación entre un tag y una página del usuario autenticado.
+
+### Flujo
+- Valida el usuario autenticado
+- Verifica que la materia, tema y página pertenezcan al usuario
+- Busca la relación entre la página y el tag
+- Si existe, elimina la asociación
+- Persiste los cambios
+
+### Autenticación requerida
+- Header: `Authorization: Bearer <access_token>`
+
+### Path params
+- `subject_id`: ID de la materia
+- `topic_id`: ID del tema
+- `page_id`: ID de la página
+- `tag_id`: ID del tag
+
+### Notas
+- Solo elimina la relación, no el tag en sí
+- Si el tag no está asociado a la página → error 404
+
+### Resultado
+- No retorna contenido (`204 No Content`)
+""",
+    responses={
+        204: {"description": "Tag eliminado de la página correctamente"},
+        401: {"description": "No autenticado o token inválido"},
+        404: {"description": "Relación página-tag no encontrada"}
+    }
+)
 def delete_page_tag(
     tag_id: int,
     session: SessionDep,

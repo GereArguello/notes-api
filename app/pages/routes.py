@@ -21,7 +21,43 @@ router = APIRouter(tags=["pages"])
 
 @router.post(
     "/subjects/{subject_id}/topics/{topic_id}/pages",
-    response_model=PageRead, status_code=status.HTTP_201_CREATED
+    response_model=PageRead,
+    status_code=status.HTTP_201_CREATED,
+    summary="Crear página",
+    description="""
+Crea una nueva página dentro de un tema del usuario autenticado.
+
+### Flujo
+- Valida el usuario autenticado
+- Verifica que la materia y el tema pertenezcan al usuario
+- Recibe los datos de la página
+- Asigna automáticamente el `sort_order` al final
+- Guarda la página en base de datos
+- Retorna la página creada
+
+### Autenticación requerida
+- Header: `Authorization: Bearer <access_token>`
+
+### Path params
+- `subject_id`: ID de la materia
+- `topic_id`: ID del tema
+
+### Notas
+- El nombre de la página debe ser único dentro del tema
+- El orden (`sort_order`) se gestiona automáticamente
+
+### Ejemplo
+{
+  "title": "Introducción",
+  "content": "Contenido inicial"
+}
+""",
+    responses={
+        201: {"description": "Página creada correctamente"},
+        401: {"description": "No autenticado o token inválido"},
+        404: {"description": "Tema o materia no encontrada"},
+        409: {"description": "Ya existe una página con ese nombre"}
+    }
 )
 def create_page(
     page_data: PageCreate,
@@ -49,9 +85,48 @@ def create_page(
     return db_page
 
 @router.get(
-        "/subjects/{subject_id}/topics/{topic_id}/pages",
-        response_model=PageResponse[PageRead],
-        status_code=status.HTTP_200_OK)
+    "/subjects/{subject_id}/topics/{topic_id}/pages",
+    response_model=PageResponse[PageRead],
+    status_code=status.HTTP_200_OK,
+    summary="Listar páginas",
+    description="""
+Retorna una lista paginada de las páginas de un tema del usuario autenticado.
+
+### Flujo
+- Valida el usuario autenticado
+- Verifica que la materia y el tema pertenezcan al usuario
+- Obtiene las páginas del tema
+- Ordena por `sort_order`
+- Aplica paginación
+- Retorna los resultados
+
+### Autenticación requerida
+- Header: `Authorization: Bearer <access_token>`
+
+### Path params
+- `subject_id`: ID de la materia
+- `topic_id`: ID del tema
+
+### Query params
+- `page`: número de página
+- `size`: cantidad de elementos por página
+
+### Notas
+- Solo retorna páginas del tema del usuario autenticado
+- El orden refleja la posición definida (`sort_order`)
+
+### Estructura de respuesta
+- `items`: lista de páginas
+- `total`: total de registros
+- `page`: página actual
+- `size`: tamaño de página
+""",
+    responses={
+        200: {"description": "Listado de páginas obtenido correctamente"},
+        401: {"description": "No autenticado o token inválido"},
+        404: {"description": "Tema o materia no encontrada"}
+    }
+)
 def list_pages(
     session: SessionDep,
     topic: Topic = Depends(get_user_topic),
@@ -66,9 +141,43 @@ def list_pages(
     return paginate(session, qs, params)
 
 @router.get(
-        "/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}",
-        response_model=PageRead,
-        status_code=status.HTTP_200_OK
+    "/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}",
+    response_model=PageRead,
+    status_code=status.HTTP_200_OK,
+    summary="Obtener página",
+    description="""
+Retorna una página específica de un tema del usuario autenticado.
+
+### Flujo
+- Valida el usuario autenticado
+- Verifica que la materia, tema y página pertenezcan al usuario
+- Actualiza:
+  - `page.last_viewed_at`
+  - `topic.last_viewed_at`
+  - `subject.last_viewed_at`
+- Retorna la página
+
+### Autenticación requerida
+- Header: `Authorization: Bearer <access_token>`
+
+### Path params
+- `subject_id`: ID de la materia
+- `topic_id`: ID del tema
+- `page_id`: ID de la página
+
+### Notas
+- Solo permite acceso a recursos del usuario autenticado
+- Si la página no existe o no pertenece al usuario → error 404
+- Actualiza métricas de uso en toda la jerarquía
+
+### Resultado
+Retorna la página con todos sus campos
+""",
+    responses={
+        200: {"description": "Página obtenida correctamente"},
+        401: {"description": "No autenticado o token inválido"},
+        404: {"description": "Página, tema o materia no encontrada"}
+    }
 )
 def read_page(
     session: SessionDep,
@@ -89,7 +198,48 @@ def read_page(
 @router.patch(
     "/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}",
     response_model=PageRead,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    summary="Actualizar página",
+    description="""
+Actualiza parcialmente una página de un tema del usuario autenticado.
+
+### Flujo
+- Valida el usuario autenticado
+- Verifica que la materia, tema y página pertenezcan al usuario
+- Obtiene los campos a actualizar (parciales)
+- Verifica que haya datos para actualizar
+- Si no hay cambios, retorna directamente
+- Aplica los cambios
+- Guarda en base de datos
+- Retorna la página actualizada
+
+### Autenticación requerida
+- Header: `Authorization: Bearer <access_token>`
+
+### Path params
+- `subject_id`: ID de la materia
+- `topic_id`: ID del tema
+- `page_id`: ID de la página
+
+### Notas
+- Solo se actualizan los campos enviados
+- No es necesario enviar todos los campos
+- Si no se envían datos → error 400
+- Si se intenta usar un título ya existente → error 409
+
+### Ejemplo
+{
+  "title": "Nuevo título",
+  "content": "Nuevo contenido"
+}
+""",
+    responses={
+        200: {"description": "Página actualizada correctamente"},
+        400: {"description": "No se enviaron datos para actualizar"},
+        401: {"description": "No autenticado o token inválido"},
+        404: {"description": "Página, tema o materia no encontrada"},
+        409: {"description": "Ya existe una página con ese título"}
+    }
 )
 def update_page(
     page_data: PageUpdate,
@@ -124,7 +274,53 @@ def update_page(
 @router.patch(
     "/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}/re-order",
     response_model=PageRead,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_200_OK,
+    summary="Reordenar página",
+    description="""
+Cambia la posición (`sort_order`) de una página dentro de un tema.
+
+### Flujo
+- Valida el usuario autenticado
+- Verifica que la materia, tema y página pertenezcan al usuario
+- Recibe el nuevo `sort_order`
+- Valida:
+  - que haya datos para actualizar
+  - que el nuevo orden sea distinto al actual
+  - que esté dentro del rango válido
+- Obtiene las páginas afectadas
+- Reordena las páginas intermedias
+- Asigna la nueva posición
+- Guarda los cambios
+
+### Autenticación requerida
+- Header: `Authorization: Bearer <access_token>`
+
+### Path params
+- `subject_id`: ID de la materia
+- `topic_id`: ID del tema
+- `page_id`: ID de la página
+
+### Body
+{
+  "sort_order": 3
+}
+
+### Notas
+- El orden es relativo dentro del tema
+- Las demás páginas se ajustan automáticamente
+- Si el orden es igual al actual, no hay cambios
+- Si está fuera de rango → error 400
+
+### Resultado
+Retorna la página con su nueva posición
+""",
+    responses={
+        200: {"description": "Página reordenada correctamente"},
+        400: {"description": "Datos inválidos o fuera de rango"},
+        401: {"description": "No autenticado o token inválido"},
+        404: {"description": "Página, tema o materia no encontrada"},
+        409: {"description": "Conflicto al reordenar las páginas"}
+    }
 )
 def re_order_page(
     session: SessionDep,
@@ -182,7 +378,48 @@ def re_order_page(
 
 @router.delete(
     "/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}",
-    status_code=status.HTTP_204_NO_CONTENT
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Eliminar página",
+    description="""
+Elimina una página de un tema del usuario autenticado y ajusta el orden de las páginas restantes.
+
+### Flujo
+- Valida el usuario autenticado
+- Verifica que la materia, tema y página pertenezcan al usuario
+- Obtiene las páginas con `sort_order` mayor a la eliminada
+- Elimina la página
+- Reordena las páginas restantes para evitar huecos
+- Persiste los cambios
+
+### Autenticación requerida
+- Header: `Authorization: Bearer <access_token>`
+
+### Path params
+- `subject_id`: ID de la materia
+- `topic_id`: ID del tema
+- `page_id`: ID de la página
+
+### Notas
+- Solo permite eliminar páginas del usuario autenticado
+- Mantiene el orden continuo (`sort_order`)
+- Las páginas posteriores se desplazan automáticamente
+
+### Ejemplo de comportamiento
+Si existen páginas con orden:
+1, 2, 3, 4
+
+Y se elimina la página con orden 2:
+→ los restantes pasan a ser:
+1, 2, 3
+
+### Resultado
+- No retorna contenido (`204 No Content`)
+""",
+    responses={
+        204: {"description": "Página eliminada correctamente"},
+        401: {"description": "No autenticado o token inválido"},
+        404: {"description": "Página, tema o materia no encontrada"}
+    }
 )
 def delete_page(
     session: SessionDep,

@@ -19,7 +19,34 @@ router = APIRouter(
     tags=["auth"]
 )
 
-@router.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
+@router.post(
+    "/login",
+    response_model=Token,
+    status_code=status.HTTP_200_OK,
+    summary="Iniciar sesión",
+    description="""
+Autentica un usuario utilizando email y contraseña.
+
+- Valida las credenciales ingresadas
+- Genera un `access_token` (para autorización)
+- Genera un `refresh_token` (para renovación de sesión)
+- Guarda el `refresh_token` en base de datos
+- Envía el `refresh_token` en una cookie HTTP-only segura
+
+### Notas
+- El campo `username` corresponde al **email** del usuario (estándar OAuth2).
+- El `access_token` debe enviarse en el header `Authorization: Bearer <token>`.
+- El `refresh_token` se maneja automáticamente mediante cookies.
+""",
+    responses={
+        200: {
+            "description": "Login exitoso. Retorna access token y setea cookie con refresh token."
+        },
+        401: {
+            "description": "Credenciales inválidas o token incorrecto"
+        }
+    }
+)
 def login(response: Response, session: SessionDep, form_data: OAuth2PasswordRequestForm = Depends()):
     
     user = authenticate_user(
@@ -67,7 +94,48 @@ def login(response: Response, session: SessionDep, form_data: OAuth2PasswordRequ
         "token_type": "bearer"
     }
 
-@router.post("/refresh")
+@router.post(
+    "/refresh",
+    response_model=Token,
+    status_code=status.HTTP_200_OK,
+    summary="Refrescar sesión",
+    description="""
+Genera un nuevo `access_token` y un nuevo `refresh_token` a partir del refresh token almacenado en cookies.
+
+### Flujo
+- Lee el `refresh_token` desde la cookie
+- Valida:
+  - existencia del token
+  - tipo `refresh`
+  - que exista en base de datos
+  - que no esté revocado ni expirado
+  - que pertenezca al usuario correcto
+  - que el usuario exista y no esté eliminado
+- Revoca el refresh token anterior (rotación)
+- Genera nuevos tokens (access + refresh)
+- Guarda el nuevo refresh token en base de datos
+- Setea el nuevo refresh token en cookie HTTP-only
+
+### Notas
+- Este endpoint implementa **refresh token rotation**
+- El refresh token nunca se expone en el body
+- Si el token fue reutilizado o revocado, se invalida la sesión
+
+### Cookie requerida
+- `refresh_token` (HTTP-only)
+
+### Uso
+Se utiliza cuando el `access_token` expira.
+""",
+    responses={
+        200: {
+            "description": "Tokens renovados correctamente"
+        },
+        401: {
+            "description": "Token inválido, expirado, revocado o usuario inexistente"
+        }
+    }
+)
 def refresh_token(
     session: SessionDep,
     response: Response,
@@ -153,7 +221,43 @@ def refresh_token(
         "token_type": "bearer"
     }
 
-@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+@router.post(
+    "/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Cerrar sesión",
+    description="""
+Cierra la sesión del usuario revocando el `refresh_token` y eliminando la cookie.
+
+### Flujo
+- Lee el `refresh_token` desde la cookie
+- Valida:
+  - existencia del token
+  - tipo `refresh`
+  - que exista en base de datos
+  - que pertenezca al usuario correcto
+- Revoca el refresh token (si aún no fue revocado)
+- Elimina la cookie del navegador
+
+### Notas
+- El `access_token` no se invalida directamente, pero expirará naturalmente
+- El `refresh_token` queda inutilizable inmediatamente
+- Este endpoint es idempotente en términos de revocación
+
+### Cookie requerida
+- `refresh_token` (HTTP-only)
+
+### Resultado
+- No retorna contenido (`204 No Content`)
+""",
+    responses={
+        204: {
+            "description": "Logout exitoso. Token revocado y cookie eliminada"
+        },
+        401: {
+            "description": "Token inválido o inexistente"
+        }
+    }
+)
 def logout(
     session: SessionDep,
     response: Response,
