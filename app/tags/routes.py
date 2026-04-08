@@ -15,7 +15,7 @@ from app.page_tags.models import PageTagLink
 
 router = APIRouter(tags=["tags"])
 
-@router.post("/pages/{page_id}/tags", response_model=TagRead, status_code=status.HTTP_201_CREATED)
+@router.post("/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}/tags", response_model=TagRead, status_code=status.HTTP_201_CREATED)
 def create_tag(
     data: TagCreate,
     session: SessionDep,
@@ -47,7 +47,7 @@ def list_tags(
 
     return session.exec(query).all()
 
-@router.delete("/pages/{page_id}/tags/{tag_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}/tags/{tag_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_page_tag(
     tag_id: int,
     session: SessionDep,

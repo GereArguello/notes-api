@@ -226,3 +226,28 @@ def user_with_pages(client, user_with_topic, create_page):
         "topic_id": topic_id,
         "pages": pages
     }
+
+@pytest.fixture
+def user_with_tag(client, user_with_page):
+    token = user_with_page["access_token"]
+    subject_id = user_with_page["subject"]["id"]
+    topic_id = user_with_page["topic"]["id"]
+    page_id = user_with_page["page"]["id"]
+
+    response = client.post(
+        f"/subjects/{subject_id}/topics/{topic_id}/pages/{page_id}/tags",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"name": "pyTHon"}
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+    tag = response.json()
+
+    return {
+        "access_token": token,
+        "subject_id": subject_id,
+        "topic_id": topic_id,
+        "page_id": page_id,
+        "tag": tag
+    }
