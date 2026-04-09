@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     COOKIE_SECURE: bool = True # Producción
+    REFRESH_TOKEN_GRACE_PERIOD: int = 2
 
     ENVIRONMENT: str = "development"
     DEBUG: bool = True

@@ -9,7 +9,7 @@ from app.core.database import SessionDep
 from app.utils import utc_now
 from datetime import timedelta, timezone
 
-GRACE_PERIOD = timedelta(seconds=2)
+GRACE_PERIOD = timedelta(seconds=settings.REFRESH_TOKEN_GRACE_PERIOD)
 
 def get_user_by_email(session: Session, email: str) -> User | None:
     return session.exec(select(User).where(User.email == email)).first()
