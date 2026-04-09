@@ -1,12 +1,12 @@
-from fastapi import Cookie
 from sqlmodel import SQLModel, Field
+from pydantic import EmailStr
 from typing import Optional
 from datetime import date, datetime
 
 class UserCreate(SQLModel):
     first_name: str = Field(min_length=1, max_length=50)
     last_name: str = Field(min_length=1, max_length=50)
-    email: str
+    email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     password2: str = Field(min_length=8, max_length=128)
     birth_date: Optional[date] = None

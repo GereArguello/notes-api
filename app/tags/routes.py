@@ -57,7 +57,6 @@ Retorna el tag asociado
         201: {"description": "Tag creado/asociado correctamente"},
         401: {"description": "No autenticado o token inválido"},
         404: {"description": "Página, tema o materia no encontrada"},
-        409: {"description": "El tag ya está asociado a la página"}
     }
 )
 def create_tag(
