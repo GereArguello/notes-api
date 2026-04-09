@@ -79,7 +79,7 @@ DEBUG=True
 ## 🛠️ Instalación
 
 ```bash
-git clone https://github.com/tu-usuario/notes-api.git
+git clone https://github.com/GereArguello/notes-api.git
 cd notes-api
 
 python -m venv venv

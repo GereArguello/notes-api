@@ -30,6 +30,7 @@ class Tag(SQLModel, table=True):
 
     pages: list["Page"] = Relationship(
         back_populates="tags",
-        link_model=PageTagLink
+        link_model=PageTagLink,
+        passive_deletes=True
     )
 
