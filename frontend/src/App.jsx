@@ -1,21 +1,25 @@
 import { useState } from "react";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
+import SubjectsPage from "./components/SubjectPage";
 
 function App() {
   const [view, setView] = useState("login");
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem("token"));
 
   //  si hay token → usuario logueado
   if (token) {
-    return <h1>Estás logueado ✅</h1>;
+    return <SubjectsPage token={token}/>
   }
 
   if (view === "login") {
     return (
       <LoginForm
         onSwitch={() => setView("register")}
-        onLogin={(token) => setToken(token)}
+        onLogin={(token) => {
+          localStorage.setItem("token", token);
+          setToken(token);
+        }}
       />
     );
   }
