@@ -6,6 +6,9 @@ import RegisterPage from "./pages/RegisterPage";
 import SubjectsPage from "./pages/SubjectsPage";
 import CreateSubjectPage from "./pages/CreateSubjectPage";
 import EditSubjectPage from "./pages/EditSubjectPage";
+import TopicsPage from "./pages/TopicsPage";
+import CreateTopicPage from "./pages/CreateTopicPage"
+import EditTopicPage from "./pages/EditTopicPage";
 
 
 function App() {
@@ -43,7 +46,7 @@ function App() {
               ? <Navigate to="/subjects" /> 
               : <RegisterPage />
           } 
-        />
+        /> 
 
         {/* Ruta protegida */}
         <Route 
@@ -69,6 +72,34 @@ function App() {
           element={
             token 
               ? <EditSubjectPage token={token} />
+              : <Navigate to="/login" />
+          }
+        />
+        
+        <Route
+          path="/subjects/:subject_id"
+          element={
+            token 
+              ? <TopicsPage token={token} />
+              : <Navigate to="/login" />
+          }
+        />
+
+
+        <Route
+          path="/subjects/:subject_id/topics/new"
+          element={
+            token 
+              ? <CreateTopicPage token={token} />
+              : <Navigate to="/login" />
+          }
+        />
+
+        <Route
+          path="/subjects/:subject_id/topics/:topic_id/edit"
+          element={
+            token 
+              ? <EditTopicPage token={token} />
               : <Navigate to="/login" />
           }
         />

@@ -53,7 +53,7 @@ function SubjectsPage({ token, onLogout }) {
 
       {/* 🔹 botón crear */}
       <button onClick={() => navigate("/subjects/new")}>
-        + Crear materia
+         Crear materia
       </button>
 
       <ul>
@@ -69,6 +69,10 @@ function SubjectsPage({ token, onLogout }) {
             {/* 🔹 eliminar */}
             <button onClick={() => deleteSubject(s.id)}>
               Eliminar
+            </button>
+
+            <button onClick={() => navigate(`/subjects/${s.id}`)}>
+              Ver
             </button>
           </li>
         ))}
