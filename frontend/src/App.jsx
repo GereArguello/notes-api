@@ -1,30 +1,66 @@
 import { useState } from "react";
-import LoginForm from "./components/LoginForm";
-import RegisterForm from "./components/RegisterForm";
-import SubjectsPage from "./components/SubjectPage";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import SubjectsPage from "./pages/SubjectsPage";
 
 function App() {
-  const [view, setView] = useState("login");
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
 
-  //  si hay token → usuario logueado
-  if (token) {
-    return <SubjectsPage token={token}/>
-  }
+  const handleLogin = (token) => {
+    localStorage.setItem("token", token);
+    setToken(token);
+  };
 
-  if (view === "login") {
-    return (
-      <LoginForm
-        onSwitch={() => setView("register")}
-        onLogin={(token) => {
-          localStorage.setItem("token", token);
-          setToken(token);
-        }}
-      />
-    );
-  }
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setToken(null);
+  };
 
-  return <RegisterForm onSwitch={() => setView("login")} />;
+  return (
+    <BrowserRouter>
+      <Routes>
+
+        {/* Ruta pública */}
+        <Route 
+          path="/login" 
+          element={
+            token 
+              ? <Navigate to="/subjects" /> 
+              : <LoginPage onLogin={handleLogin} />
+          } 
+        />
+
+        {/* Ruta pública */}
+        <Route 
+          path="/register" 
+          element={
+            token 
+              ? <Navigate to="/subjects" /> 
+              : <RegisterPage />
+          } 
+        />
+
+        {/* Ruta protegida */}
+        <Route 
+          path="/subjects" 
+          element={
+            token 
+              ? <SubjectsPage token={token} onLogout={handleLogout} />
+              : <Navigate to="/login" />
+          } 
+        />
+
+        {/* Ruta por defecto */}
+        <Route 
+          path="*" 
+          element={<Navigate to={token ? "/subjects" : "/login"} />} 
+        />
+
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

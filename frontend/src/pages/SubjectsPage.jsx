@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import CreateSubjectForm from "./CreateSubjectForm";
+import CreateSubjectForm from "../components/CreateSubjectForm";
 
-function SubjectsPage({ token }) {
+function SubjectsPage({ token, onLogout }) {
   const [subjects, setSubjects] = useState([]);
 
   const fetchSubjects = () => {
@@ -12,8 +12,7 @@ function SubjectsPage({ token }) {
     })
       .then((res) => {
         if (res.status === 401) {
-          localStorage.removeItem("token");
-          window.location.reload();
+          onLogout();
           return Promise.reject();
         }
         return res.json();
@@ -29,16 +28,18 @@ function SubjectsPage({ token }) {
     fetchSubjects();
   }, [token]);
 
-  //  se ejecuta cuando se crea una materia
   const handleCreated = () => {
-    fetchSubjects(); // refresca la lista
+    fetchSubjects();
   };
 
   return (
     <div>
       <h1>Mis materias</h1>
 
-      <CreateSubjectForm token={token} onCreated={handleCreated} />
+      <CreateSubjectForm 
+        token={token} 
+        onCreated={handleCreated} 
+      />
 
       <ul>
         {subjects.map((s) => (
@@ -47,14 +48,10 @@ function SubjectsPage({ token }) {
           </li>
         ))}
       </ul>
-      
-      <button onClick={() => {
-        localStorage.removeItem("token");
-        window.location.reload();
-      }}>
+
+      <button onClick={onLogout}>
         Logout
       </button>
-
     </div>
   );
 }
