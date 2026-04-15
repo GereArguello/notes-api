@@ -12,6 +12,8 @@ import TopicsPage from "./pages/topics/TopicsPage";
 import CreateTopicPage from "./pages/topics/CreateTopicPage";
 import EditTopicPage from "./pages/topics/EditTopicPage";
 
+import PagesPage from "./pages/pages/PagesPage";
+
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem("token"));
 
@@ -29,40 +31,30 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* Ruta pública */}
-        <Route 
-          path="/login" 
+        {/* 🔓 Públicas */}
+        <Route
+          path="/login"
           element={
-            token 
-              ? <Navigate to="/subjects" /> 
+            token
+              ? <Navigate to="/subjects" />
               : <LoginPage onLogin={handleLogin} />
-          } 
-        />
-
-        {/* Ruta pública */}
-        <Route 
-          path="/register" 
-          element={
-            token 
-              ? <Navigate to="/subjects" /> 
-              : <RegisterPage />
-          } 
-        /> 
-
-        {/* Ruta protegida */}
-        <Route 
-          path="/subjects" 
-          element={
-            token 
-              ? <SubjectsPage token={token} onLogout={handleLogout} />
-              : <Navigate to="/login" />
-          } 
+          }
         />
 
         <Route
+          path="/register"
+          element={
+            token
+              ? <Navigate to="/subjects" />
+              : <RegisterPage />
+          }
+        />
+
+        {/* 🔐 Subjects */}
+        <Route
           path="/subjects/new"
           element={
-            token 
+            token
               ? <CreateSubjectPage token={token} />
               : <Navigate to="/login" />
           }
@@ -71,26 +63,17 @@ function App() {
         <Route
           path="/subjects/:id/edit"
           element={
-            token 
+            token
               ? <EditSubjectPage token={token} />
               : <Navigate to="/login" />
           }
         />
-        
-        <Route
-          path="/subjects/:subject_id"
-          element={
-            token 
-              ? <TopicsPage token={token} />
-              : <Navigate to="/login" />
-          }
-        />
 
-
+        {/* 🔐 Topics */}
         <Route
           path="/subjects/:subject_id/topics/new"
           element={
-            token 
+            token
               ? <CreateTopicPage token={token} />
               : <Navigate to="/login" />
           }
@@ -99,16 +82,46 @@ function App() {
         <Route
           path="/subjects/:subject_id/topics/:topic_id/edit"
           element={
-            token 
+            token
               ? <EditTopicPage token={token} />
               : <Navigate to="/login" />
           }
         />
 
-        {/* Ruta por defecto */}
-        <Route 
-          path="*" 
-          element={<Navigate to={token ? "/subjects" : "/login"} />} 
+        {/* 🔐 Pages (más específica que TopicsPage) */}
+        <Route
+          path="/subjects/:subject_id/topics/:topic_id"
+          element={
+            token
+              ? <PagesPage token={token} />
+              : <Navigate to="/login" />
+          }
+        />
+
+        {/* 🔐 Topics list */}
+        <Route
+          path="/subjects/:subject_id"
+          element={
+            token
+              ? <TopicsPage token={token} />
+              : <Navigate to="/login" />
+          }
+        />
+
+        {/* 🔐 Subjects list */}
+        <Route
+          path="/subjects"
+          element={
+            token
+              ? <SubjectsPage token={token} onLogout={handleLogout} />
+              : <Navigate to="/login" />
+          }
+        />
+
+        {/* 🔁 Default */}
+        <Route
+          path="*"
+          element={<Navigate to={token ? "/subjects" : "/login"} />}
         />
 
       </Routes>
