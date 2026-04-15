@@ -1,49 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-function CreateSubjectForm({ token, onCreated }) {
+function SubjectForm({ initialData, onSubmit, buttonText, onCancel }) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [difficulty, setDifficulty] = useState(1);
   const [error, setError] = useState(null);
 
+  // 🔹 cargar datos si estamos editando
+  useEffect(() => {
+    if (initialData) {
+      setName(initialData.name || "");
+      setDescription(initialData.description || "");
+      setDifficulty(initialData.difficulty || 1);
+    }
+  }, [initialData]);
+
   const handleSubmit = (e) => {
-    e.preventDefault(); // evita recargar la página
+    e.preventDefault();
 
-    fetch("http://localhost:8000/subjects", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        name,
-        description,
-        difficulty
-      }),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Error al crear materia");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        setName("");
-        setDescription("");
-        setDifficulty(1);
-        setError(null);
-
-        // avisar al padre (SubjectsPage) que se creó una materia
-        onCreated(data);
-      })
-      .catch(() => {
-        setError("No se pudo crear la materia");
-      });
+    onSubmit({
+      name,
+      description,
+      difficulty,
+    }).catch(() => {
+      setError("Error al guardar");
+    });
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Crear materia</h2>
+      <h2>{buttonText}</h2>
 
       <input
         type="text"
@@ -71,11 +57,14 @@ function CreateSubjectForm({ token, onCreated }) {
         <option value={5}>Muy difícil</option>
       </select>
 
-      <button type="submit">Crear</button>
+      <button type="submit">{buttonText}</button>
+      <button type="button" onClick={onCancel}>
+        Cancelar
+      </button>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
     </form>
   );
 }
 
-export default CreateSubjectForm;
+export default SubjectForm;

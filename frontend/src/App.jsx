@@ -4,6 +4,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import SubjectsPage from "./pages/SubjectsPage";
+import CreateSubjectPage from "./pages/CreateSubjectPage";
+import EditSubjectPage from "./pages/EditSubjectPage";
+
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem("token"));
@@ -50,6 +53,24 @@ function App() {
               ? <SubjectsPage token={token} onLogout={handleLogout} />
               : <Navigate to="/login" />
           } 
+        />
+
+        <Route
+          path="/subjects/new"
+          element={
+            token 
+              ? <CreateSubjectPage token={token} />
+              : <Navigate to="/login" />
+          }
+        />
+
+        <Route
+          path="/subjects/:id/edit"
+          element={
+            token 
+              ? <EditSubjectPage token={token} />
+              : <Navigate to="/login" />
+          }
         />
 
         {/* Ruta por defecto */}

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import CreateSubjectForm from "../components/CreateSubjectForm";
+import { useNavigate } from "react-router-dom";
 
 function SubjectsPage({ token, onLogout }) {
   const [subjects, setSubjects] = useState([]);
+  const navigate = useNavigate();
 
   const fetchSubjects = () => {
     fetch("http://localhost:8000/subjects", {
@@ -28,23 +29,47 @@ function SubjectsPage({ token, onLogout }) {
     fetchSubjects();
   }, [token]);
 
-  const handleCreated = () => {
-    fetchSubjects();
+  const deleteSubject = (id) => {
+    if (!window.confirm("¿Seguro que querés eliminar esta materia?")) return;
+
+    fetch(`http://localhost:8000/subjects/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        fetchSubjects();
+      })
+      .catch(() => {
+        alert("Error al eliminar");
+      });
   };
 
   return (
     <div>
       <h1>Mis materias</h1>
 
-      <CreateSubjectForm 
-        token={token} 
-        onCreated={handleCreated} 
-      />
+      {/* 🔹 botón crear */}
+      <button onClick={() => navigate("/subjects/new")}>
+        + Crear materia
+      </button>
 
       <ul>
         {subjects.map((s) => (
           <li key={s.id}>
             <strong>{s.name}</strong> — {s.difficulty_label}
+
+            {/* 🔹 editar */}
+            <button onClick={() => navigate(`/subjects/${s.id}/edit`)}>
+              Editar
+            </button>
+
+            {/* 🔹 eliminar */}
+            <button onClick={() => deleteSubject(s.id)}>
+              Eliminar
+            </button>
           </li>
         ))}
       </ul>
