@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import SubjectsPage from "./pages/SubjectsPage";
-import CreateSubjectPage from "./pages/CreateSubjectPage";
-import EditSubjectPage from "./pages/EditSubjectPage";
-import TopicsPage from "./pages/TopicsPage";
-import CreateTopicPage from "./pages/CreateTopicPage"
-import EditTopicPage from "./pages/EditTopicPage";
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
 
+import SubjectsPage from "./pages/subjects/SubjectsPage";
+import CreateSubjectPage from "./pages/subjects/CreateSubjectPage";
+import EditSubjectPage from "./pages/subjects/EditSubjectPage";
+
+import TopicsPage from "./pages/topics/TopicsPage";
+import CreateTopicPage from "./pages/topics/CreateTopicPage";
+import EditTopicPage from "./pages/topics/EditTopicPage";
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem("token"));

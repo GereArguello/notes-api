@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import TopicForm from "../components/TopicForm";
+import TopicForm from "../../components/TopicForm";
 
 function CreateTopicPage({ token }) {
   const navigate = useNavigate();

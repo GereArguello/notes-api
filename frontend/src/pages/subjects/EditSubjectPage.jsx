@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import TopicForm from "../components/TopicForm";
+import SubjectForm from "../../components/SubjectForm";
 
-function EditTopicPage({ token }) {
-  const { subject_id, topic_id } = useParams()
+function EditSubjectPage({ token }) {
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  const [topic, setTopic] = useState(null);
+  const [subject, setSubject] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 traer datos del topic
+  // 🔹 traer datos del subject
   useEffect(() => {
-    fetch(`http://localhost:8000/subjects/${subject_id}/topics/${topic_id}`, {
+    fetch(`http://localhost:8000/subjects/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -21,18 +21,17 @@ function EditTopicPage({ token }) {
         return res.json();
       })
       .then((data) => {
-        setTopic(data);
+        setSubject(data);
         setLoading(false);
       })
       .catch(() => {
-        alert("Error al cargar tema");
-        setLoading(false);
-        navigate(`/subjects/${subject_id}`);
+        alert("Error al cargar materia");
+        navigate("/subjects");
       });
-  }, [subject_id, topic_id, token]);
+  }, [id, token]);
 
   const handleUpdate = async (data) => {
-    const res = await fetch(`http://localhost:8000/subjects/${subject_id}/topics/${topic_id}`, {
+    const res = await fetch(`http://localhost:8000/subjects/${id}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -45,23 +44,23 @@ function EditTopicPage({ token }) {
       throw new Error("Error al actualizar");
     }
 
-    navigate(`/subjects/${subject_id}`);
+    navigate("/subjects");
   };
 
   if (loading) return <p>Cargando...</p>;
 
   return (
     <div>
-      <h1>Editar tema</h1>
+      <h1>Editar materia</h1>
 
-      <TopicForm
-        initialData={topic}
+      <SubjectForm
+        initialData={subject}
         buttonText="Guardar cambios"
         onSubmit={handleUpdate}
-        onCancel={() => navigate(`/subjects/${subject_id}`)}
+        onCancel={() => navigate("/subjects")}
       />
     </div>
   );
 }
 
-export default EditTopicPage;
+export default EditSubjectPage;

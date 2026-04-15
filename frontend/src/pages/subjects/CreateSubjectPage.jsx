@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import SubjectForm from "../components/SubjectForm";
+import SubjectForm from "../../components/SubjectForm";
 
 function CreateSubjectPage({ token }) {
   const navigate = useNavigate();
