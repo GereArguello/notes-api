@@ -13,6 +13,9 @@ import CreateTopicPage from "./pages/topics/CreateTopicPage";
 import EditTopicPage from "./pages/topics/EditTopicPage";
 
 import PagesPage from "./pages/pages/PagesPage";
+import CreatePagePage from "./pages/pages/CreatePagePage";
+import EditPagePage from "./pages/pages/EditPagePage";
+import PageDetailPage from "./pages/pages/PageDetailPage";
 
 function App() {
   const [token, setToken] = useState(() => localStorage.getItem("token"));
@@ -56,6 +59,36 @@ function App() {
           element={
             token
               ? <CreateSubjectPage token={token} />
+              : <Navigate to="/login" />
+          }
+        />
+
+        {/* 🔐 Pages - Create */}
+        <Route
+          path="/subjects/:subject_id/topics/:topic_id/pages/new"
+          element={
+            token
+              ? <CreatePagePage token={token} />
+              : <Navigate to="/login" />
+          }
+        />
+
+        {/* 🔐 Pages - Edit */}
+        <Route
+          path="/subjects/:subject_id/topics/:topic_id/pages/:page_id/edit"
+          element={
+            token
+              ? <EditPagePage token={token} />
+              : <Navigate to="/login" />
+          }
+        />
+
+        {/* 🔐 Page Detail */}
+        <Route
+          path="/subjects/:subject_id/topics/:topic_id/pages/:page_id"
+          element={
+            token
+              ? <PageDetailPage token={token} />
               : <Navigate to="/login" />
           }
         />

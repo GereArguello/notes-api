@@ -6,8 +6,6 @@ function RegisterPage() {
 
   return (
     <div>
-      <h1>Crear cuenta</h1>
-
       <RegisterForm onSwitch={() => navigate("/login")} />
     </div>
   );

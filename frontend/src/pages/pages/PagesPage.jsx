@@ -19,7 +19,7 @@ function PagesPage({ token }) {
             return res.json();
           })
           .then((data) => {
-            setPages(data.items);
+            setPages(data.items || []);
             setLoading(false);
           })
           .catch(() => {
@@ -61,6 +61,9 @@ function PagesPage({ token }) {
                 Crear página
             </button>
 
+            {pages.length === 0 ? (
+                <p>No hay páginas todavía</p>
+            ) : (
             <ul>
                 {pages.map((p) => (
                     <li key={p.id}>
@@ -88,6 +91,12 @@ function PagesPage({ token }) {
                     </li>
                 ))}
             </ul>
+            )}
+
+            <button onClick={() => navigate(`/subjects/${subject_id}`)}>
+            Volver a temas
+            </button>
+
         </div>
     )
 }

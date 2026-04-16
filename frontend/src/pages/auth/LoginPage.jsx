@@ -11,8 +11,6 @@ function LoginPage({ onLogin }) {
 
   return (
     <div>
-      <h1>Iniciar sesión</h1>
-
       <LoginForm
         onLogin={handleLoginSuccess}
         onSwitch={() => navigate("/register")}
