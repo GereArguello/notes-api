@@ -1,10 +1,12 @@
 import { useEffect, useState} from "react";
 import { useParams, useNavigate, useLocation} from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
-function PagesPage({ token }) {
+function PagesPage() {
     const { subject_id, topic_id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
+    const { token } = useAuth();
 
     const [pages, setPages] = useState([]);
     const [loading, setLoading] = useState(true);

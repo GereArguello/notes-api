@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
-function TopicsPage({ token }) {
+function TopicsPage() {
   const { subject_id } = useParams();
   const navigate = useNavigate();
+  const { token } = useAuth();
 
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);

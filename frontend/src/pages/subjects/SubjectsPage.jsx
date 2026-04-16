@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
-function SubjectsPage({ token, onLogout }) {
+function SubjectsPage() {
   const [subjects, setSubjects] = useState([]);
   const navigate = useNavigate();
+  const { token, logout } = useAuth();
 
   const fetchSubjects = () => {
     fetch("http://localhost:8000/subjects", {
@@ -78,7 +80,7 @@ function SubjectsPage({ token, onLogout }) {
         ))}
       </ul>
 
-      <button onClick={onLogout}>
+      <button onClick={logout}>
         Logout
       </button>
     </div>

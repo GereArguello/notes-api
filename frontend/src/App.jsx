@@ -1,5 +1,7 @@
-import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
@@ -17,18 +19,18 @@ import CreatePagePage from "./pages/pages/CreatePagePage";
 import EditPagePage from "./pages/pages/EditPagePage";
 import PageDetailPage from "./pages/pages/PageDetailPage";
 
+
 function App() {
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
+}
 
-  const handleLogin = (token) => {
-    localStorage.setItem("token", token);
-    setToken(token);
-  };
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-  };
+function AppRoutes() {
+  const { token } = useAuth();
 
   return (
     <BrowserRouter>
@@ -38,127 +40,118 @@ function App() {
         <Route
           path="/login"
           element={
-            token
-              ? <Navigate to="/subjects" />
-              : <LoginPage onLogin={handleLogin} />
+            token ? <Navigate to="/subjects" /> : <LoginPage />
           }
         />
 
         <Route
           path="/register"
           element={
-            token
-              ? <Navigate to="/subjects" />
-              : <RegisterPage />
+            token ? <Navigate to="/subjects" /> : <RegisterPage />
           }
         />
 
-        {/* 🔐 Subjects */}
-        <Route
-          path="/subjects/new"
-          element={
-            token
-              ? <CreateSubjectPage token={token} />
-              : <Navigate to="/login" />
-          }
-        />
-
-        {/* 🔐 Pages - Create */}
-        <Route
-          path="/subjects/:subject_id/topics/:topic_id/pages/new"
-          element={
-            token
-              ? <CreatePagePage token={token} />
-              : <Navigate to="/login" />
-          }
-        />
-
-        {/* 🔐 Pages - Edit */}
-        <Route
-          path="/subjects/:subject_id/topics/:topic_id/pages/:page_id/edit"
-          element={
-            token
-              ? <EditPagePage token={token} />
-              : <Navigate to="/login" />
-          }
-        />
-
-        {/* 🔐 Page Detail */}
-        <Route
-          path="/subjects/:subject_id/topics/:topic_id/pages/:page_id"
-          element={
-            token
-              ? <PageDetailPage token={token} />
-              : <Navigate to="/login" />
-          }
-        />
-
-        <Route
-          path="/subjects/:id/edit"
-          element={
-            token
-              ? <EditSubjectPage token={token} />
-              : <Navigate to="/login" />
-          }
-        />
-
-        {/* 🔐 Topics */}
-        <Route
-          path="/subjects/:subject_id/topics/new"
-          element={
-            token
-              ? <CreateTopicPage token={token} />
-              : <Navigate to="/login" />
-          }
-        />
-
-        <Route
-          path="/subjects/:subject_id/topics/:topic_id/edit"
-          element={
-            token
-              ? <EditTopicPage token={token} />
-              : <Navigate to="/login" />
-          }
-        />
-
-        {/* 🔐 Pages (más específica que TopicsPage) */}
-        <Route
-          path="/subjects/:subject_id/topics/:topic_id"
-          element={
-            token
-              ? <PagesPage token={token} />
-              : <Navigate to="/login" />
-          }
-        />
-
-        {/* 🔐 Topics list */}
-        <Route
-          path="/subjects/:subject_id"
-          element={
-            token
-              ? <TopicsPage token={token} />
-              : <Navigate to="/login" />
-          }
-        />
-
-        {/* 🔐 Subjects list */}
+        {/* 🔐 protegidas */}
         <Route
           path="/subjects"
           element={
-            token
-              ? <SubjectsPage token={token} onLogout={handleLogout} />
-              : <Navigate to="/login" />
+            <ProtectedRoute>
+              <SubjectsPage />
+            </ProtectedRoute>
           }
         />
 
-        {/* 🔁 Default */}
-        <Route
-          path="*"
-          element={<Navigate to={token ? "/subjects" : "/login"} />}
-        />
+          <Route
+            path="/subjects/new"
+            element={
+              <ProtectedRoute>
+                <CreateSubjectPage />
+              </ProtectedRoute>
+            }
+          />
 
-      </Routes>
-    </BrowserRouter>
+          <Route
+            path="/subjects/:id/edit"
+            element={
+              <ProtectedRoute>
+                <EditSubjectPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 🔐 Topics */}
+          <Route
+            path="/subjects/:subject_id"
+            element={
+              <ProtectedRoute>
+                <TopicsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/subjects/:subject_id/topics/new"
+            element={
+              <ProtectedRoute>
+                <CreateTopicPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/subjects/:subject_id/topics/:topic_id/edit"
+            element={
+              <ProtectedRoute>
+                <EditTopicPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 🔐 Pages */}
+          <Route
+            path="/subjects/:subject_id/topics/:topic_id"
+            element={
+              <ProtectedRoute>
+                <PagesPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/subjects/:subject_id/topics/:topic_id/pages/new"
+            element={
+              <ProtectedRoute>
+                <CreatePagePage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/subjects/:subject_id/topics/:topic_id/pages/:page_id/edit"
+            element={
+              <ProtectedRoute>
+                <EditPagePage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/subjects/:subject_id/topics/:topic_id/pages/:page_id"
+            element={
+              <ProtectedRoute>
+                <PageDetailPage />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* 🔁 Default */}
+          <Route
+            path="*"
+            element={<Navigate to={token ? "/subjects" : "/login"} />}
+          />
+
+        </Routes>
+      </BrowserRouter>
   );
 }
 
