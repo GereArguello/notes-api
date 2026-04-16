@@ -1,13 +1,22 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import PageForm from "../../components/PageForm";
 
 function EditPagePage({ token }) {
   const { subject_id, topic_id, page_id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const goBack = () => {
+  if (location.state?.from) {
+      navigate(location.state.from);
+  } else {
+      navigate(`/subjects/${subject_id}/topics/${topic_id}`);
+  }
+  };
 
   // 🔹 traer página
   useEffect(() => {
@@ -50,7 +59,7 @@ function EditPagePage({ token }) {
       throw new Error("Error al actualizar");
     }
 
-    navigate(`/subjects/${subject_id}/topics/${topic_id}`);
+    goBack();
   };
 
   if (loading) return <p>Cargando...</p>;
@@ -63,9 +72,7 @@ function EditPagePage({ token }) {
         initialData={page}
         buttonText="Guardar cambios"
         onSubmit={handleUpdate}
-        onCancel={() =>
-          navigate(`/subjects/${subject_id}/topics/${topic_id}`)
-        }
+        onCancel={goBack}
       />
     </div>
   );

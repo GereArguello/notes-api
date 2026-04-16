@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 function PageDetailPage({ token }) {
   const { subject_id, topic_id, page_id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -49,11 +50,11 @@ function PageDetailPage({ token }) {
       </button>
 
       <button
-        onClick={() =>
-          navigate(
-            `/subjects/${subject_id}/topics/${topic_id}/pages/${page_id}/edit`
+      onClick={() =>
+          navigate(`/subjects/${subject_id}/topics/${topic_id}/pages/${page.id}/edit`,
+          {state: { from: location.pathname}}
           )
-        }
+      }
       >
         Editar
       </button>
