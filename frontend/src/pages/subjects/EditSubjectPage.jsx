@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import SubjectForm from "../../components/SubjectForm";
+import { useAuth } from "../../context/AuthContext";
 
-function EditSubjectPage({ token }) {
+function EditSubjectPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { token } = useAuth();
 
   const [subject, setSubject] = useState(null);
   const [loading, setLoading] = useState(true);

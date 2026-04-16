@@ -1,9 +1,11 @@
 import { useNavigate, useParams } from "react-router-dom";
 import PageForm from "../../components/PageForm";
+import { useAuth } from "../../context/AuthContext";
 
-function CreatePagePage({ token }) {
+function CreatePagePage() {
   const navigate = useNavigate();
   const { subject_id, topic_id } = useParams();
+  const { token } = useAuth();
 
   const handleCreate = async (data) => {
     const res = await fetch(

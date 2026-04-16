@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
-function PageDetailPage({ token }) {
+function PageDetailPage() {
   const { subject_id, topic_id, page_id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { token } = useAuth();
 
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);

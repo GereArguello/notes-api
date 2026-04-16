@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import PageForm from "../../components/PageForm";
+import { useAuth } from "../../context/AuthContext";
 
-function EditPagePage({ token }) {
+function EditPagePage() {
   const { subject_id, topic_id, page_id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { token } = useAuth();
 
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import TopicForm from "../../components/TopicForm";
+import { useAuth } from "../../context/AuthContext";
 
-function EditTopicPage({ token }) {
+function EditTopicPage() {
   const { subject_id, topic_id } = useParams()
   const navigate = useNavigate();
+  const { token } = useAuth();
 
   const [topic, setTopic] = useState(null);
   const [loading, setLoading] = useState(true);

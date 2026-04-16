@@ -1,9 +1,11 @@
 import { useNavigate, useParams } from "react-router-dom";
 import TopicForm from "../../components/TopicForm";
+import { useAuth } from "../../context/AuthContext";
 
-function CreateTopicPage({ token }) {
+function CreateTopicPage() {
   const navigate = useNavigate();
-  const { subject_id } = useParams(); //  
+  const { subject_id } = useParams();
+  const { token } = useAuth();
 
   const handleCreate = async (data) => {
     const res = await fetch(

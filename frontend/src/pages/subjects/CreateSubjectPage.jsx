@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import SubjectForm from "../../components/SubjectForm";
+import { useAuth } from "../../context/AuthContext";
 
-function CreateSubjectPage({ token }) {
+function CreateSubjectPage() {
   const navigate = useNavigate();
+  const { token } = useAuth();
 
   const handleCreate = async (data) => {
     const res = await fetch("http://localhost:8000/subjects", {
