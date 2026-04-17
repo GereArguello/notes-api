@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import SubjectForm from "../../components/SubjectForm";
 import { useAuth } from "../../context/AuthContext";
+import { fetchWithAuth } from "../../api/fetchWithAuth";
 
 function EditSubjectPage() {
   const { id } = useParams();
@@ -13,40 +14,34 @@ function EditSubjectPage() {
 
   // 🔹 traer datos del subject
   useEffect(() => {
-    fetch(`http://localhost:8000/subjects/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then((data) => {
+    const fetchSubject = async () => {
+      try {
+        const data = await fetchWithAuth(`/subjects/${id}`, token);
         setSubject(data);
-        setLoading(false);
-      })
-      .catch(() => {
+      } catch (err) {
+        console.error(err);
         alert("Error al cargar materia");
         navigate("/subjects");
-      });
-  }, [id, token]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubject();
+  }, [id, token, navigate]);
 
   const handleUpdate = async (data) => {
-    const res = await fetch(`http://localhost:8000/subjects/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
+    try {
+      await fetchWithAuth(`/subjects/${id}`, token, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
 
-    if (!res.ok) {
-      throw new Error("Error al actualizar");
+      navigate("/subjects");
+    } catch (err) {
+      console.error(err);
+      alert("Error al actualizar");
     }
-
-    navigate("/subjects");
   };
 
   if (loading) return <p>Cargando...</p>;

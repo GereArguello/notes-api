@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { fetchWithAuth } from "../../api/fetchWithAuth";
 
 function TopicsPage() {
   const { subject_id } = useParams();
@@ -12,23 +13,22 @@ function TopicsPage() {
 
   // 🔹 traer topics
   useEffect(() => {
-    fetch(`http://localhost:8000/subjects/${subject_id}/topics`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then((data) => {
+    const fetchTopics = async () => {
+      try {
+        const data = await fetchWithAuth(
+          `/subjects/${subject_id}/topics`,
+          token
+        );
         setTopics(data.items);
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
+      } catch (err) {
+        console.error(err);
         alert("Error al cargar temas");
-      });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopics();
   }, [subject_id, token]);
 
   // 🔹 eliminar topic
@@ -37,24 +37,19 @@ function TopicsPage() {
     if (!confirmDelete) return;
 
     try {
-      const res = await fetch(
-        `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}`,
+      await fetchWithAuth(
+        `/subjects/${subject_id}/topics/${topic_id}`,
+        token,
         {
           method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 
-      if (!res.ok) {
-        throw new Error();
-      }
-
-      // ✅ actualizar estado local (sin refetch)
+      // ✅ mantener tu optimización (sin refetch)
       setTopics((prev) => prev.filter((t) => t.id !== topic_id));
 
-    } catch {
+    } catch (err) {
+      console.error(err);
       alert("Error al eliminar el tema");
     }
   };

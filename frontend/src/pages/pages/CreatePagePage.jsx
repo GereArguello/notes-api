@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import PageForm from "../../components/PageForm";
 import { useAuth } from "../../context/AuthContext";
+import { fetchWithAuth } from "../../api/fetchWithAuth";
 
 function CreatePagePage() {
   const navigate = useNavigate();
@@ -8,23 +9,21 @@ function CreatePagePage() {
   const { token } = useAuth();
 
   const handleCreate = async (data) => {
-    const res = await fetch(
-      `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/pages`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    try {
+      await fetchWithAuth(
+        `/subjects/${subject_id}/topics/${topic_id}/pages`,
+        token,
+        {
+          method: "POST",
+          body: JSON.stringify(data),
+        }
+      );
 
-    if (!res.ok) {
-      throw new Error("Error al crear página");
+      navigate(`/subjects/${subject_id}/topics/${topic_id}`);
+    } catch (err) {
+      console.error(err);
+      alert("Error al crear página");
     }
-
-    navigate(`/subjects/${subject_id}/topics/${topic_id}`);
   };
 
   return (

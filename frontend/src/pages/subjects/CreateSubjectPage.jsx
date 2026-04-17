@@ -1,27 +1,24 @@
 import { useNavigate } from "react-router-dom";
 import SubjectForm from "../../components/SubjectForm";
 import { useAuth } from "../../context/AuthContext";
+import { fetchWithAuth } from "../../api/fetchWithAuth";
 
 function CreateSubjectPage() {
   const navigate = useNavigate();
   const { token } = useAuth();
 
   const handleCreate = async (data) => {
-    const res = await fetch("http://localhost:8000/subjects", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
+    try {
+      await fetchWithAuth("/subjects", token, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
 
-    if (!res.ok) {
-      throw new Error("Error al crear");
+      navigate("/subjects");
+    } catch (err) {
+      console.error(err);
+      alert("Error al crear");
     }
-
-    // volver al listado
-    navigate("/subjects");
   };
 
   return (

@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import TopicForm from "../../components/TopicForm";
 import { useAuth } from "../../context/AuthContext";
+import { fetchWithAuth } from "../../api/fetchWithAuth";
 
 function CreateTopicPage() {
   const navigate = useNavigate();
@@ -8,24 +9,17 @@ function CreateTopicPage() {
   const { token } = useAuth();
 
   const handleCreate = async (data) => {
-    const res = await fetch(
-      `http://localhost:8000/subjects/${subject_id}/topics`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error("Error al crear");
+    try{
+      await fetchWithAuth(
+        `/subjects/${subject_id}/topics`, token, {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+        navigate(`/subjects/${subject_id}`);
+    } catch(err) {
+      console.error(err);
+      alert("Error al crear")
     }
-
-    // volver al subject
-    navigate(`/subjects/${subject_id}`);
   };
 
   return (

@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import TopicForm from "../../components/TopicForm";
 import { useAuth } from "../../context/AuthContext";
+import { fetchWithAuth } from "../../api/fetchWithAuth";
 
 function EditTopicPage() {
-  const { subject_id, topic_id } = useParams()
+  const { subject_id, topic_id } = useParams();
   const navigate = useNavigate();
   const { token } = useAuth();
 
@@ -13,41 +14,41 @@ function EditTopicPage() {
 
   // 🔹 traer datos del topic
   useEffect(() => {
-    fetch(`http://localhost:8000/subjects/${subject_id}/topics/${topic_id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then((data) => {
+    const fetchTopic = async () => {
+      try {
+        const data = await fetchWithAuth(
+          `/subjects/${subject_id}/topics/${topic_id}`,
+          token
+        );
         setTopic(data);
-        setLoading(false);
-      })
-      .catch(() => {
+      } catch (err) {
+        console.error(err);
         alert("Error al cargar tema");
-        setLoading(false);
         navigate(`/subjects/${subject_id}`);
-      });
-  }, [subject_id, topic_id, token]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTopic();
+  }, [subject_id, topic_id, token, navigate]);
 
   const handleUpdate = async (data) => {
-    const res = await fetch(`http://localhost:8000/subjects/${subject_id}/topics/${topic_id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
+    try {
+      await fetchWithAuth(
+        `/subjects/${subject_id}/topics/${topic_id}`,
+        token,
+        {
+          method: "PATCH",
+          body: JSON.stringify(data),
+        }
+      );
 
-    if (!res.ok) {
-      throw new Error("Error al actualizar");
+      navigate(`/subjects/${subject_id}`);
+    } catch (err) {
+      console.error(err);
+      alert("Error al actualizar");
     }
-
-    navigate(`/subjects/${subject_id}`);
   };
 
   if (loading) return <p>Cargando...</p>;

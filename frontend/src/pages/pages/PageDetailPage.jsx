@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { fetchWithAuth } from "../../api/fetchWithAuth";
 
 function PageDetailPage() {
   const { subject_id, topic_id, page_id } = useParams();
@@ -11,29 +12,25 @@ function PageDetailPage() {
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 traer página
   useEffect(() => {
-    fetch(
-      `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/pages/${page_id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then((data) => {
+    const fetchPage = async () => {
+      try {
+        const data = await fetchWithAuth(
+          `/subjects/${subject_id}/topics/${topic_id}/pages/${page_id}`,
+          token
+        );
         setPage(data);
-        setLoading(false);
-      })
-      .catch(() => {
+      } catch (err) {
+        console.error(err);
         alert("Error al cargar página");
         navigate(`/subjects/${subject_id}/topics/${topic_id}`);
-      });
-  }, [subject_id, topic_id, page_id, token]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPage();
+  }, [subject_id, topic_id, page_id, token, navigate]);
 
   if (loading) return <p>Cargando...</p>;
 
@@ -52,11 +49,12 @@ function PageDetailPage() {
       </button>
 
       <button
-      onClick={() =>
-          navigate(`/subjects/${subject_id}/topics/${topic_id}/pages/${page.id}/edit`,
-          {state: { from: location.pathname}}
+        onClick={() =>
+          navigate(
+            `/subjects/${subject_id}/topics/${topic_id}/pages/${page.id}/edit`,
+            { state: { from: location.pathname } }
           )
-      }
+        }
       >
         Editar
       </button>

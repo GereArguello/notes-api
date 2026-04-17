@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import PageForm from "../../components/PageForm";
 import { useAuth } from "../../context/AuthContext";
+import { fetchWithAuth } from "../../api/fetchWithAuth";
 
 function EditPagePage() {
   const { subject_id, topic_id, page_id } = useParams();
@@ -13,55 +14,49 @@ function EditPagePage() {
   const [loading, setLoading] = useState(true);
 
   const goBack = () => {
-  if (location.state?.from) {
+    if (location.state?.from) {
       navigate(location.state.from);
-  } else {
+    } else {
       navigate(`/subjects/${subject_id}/topics/${topic_id}`);
-  }
+    }
   };
 
-  // 🔹 traer página
   useEffect(() => {
-    fetch(
-      `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/pages/${page_id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    )
-      .then((res) => {
-        if (!res.ok) throw new Error();
-        return res.json();
-      })
-      .then((data) => {
+    const fetchPage = async () => {
+      try {
+        const data = await fetchWithAuth(
+          `/subjects/${subject_id}/topics/${topic_id}/pages/${page_id}`,
+          token
+        );
         setPage(data);
-        setLoading(false);
-      })
-      .catch(() => {
+      } catch (err) {
+        console.error(err);
         alert("Error al cargar página");
         navigate(`/subjects/${subject_id}/topics/${topic_id}`);
-      });
-  }, [subject_id, topic_id, page_id, token]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPage();
+  }, [subject_id, topic_id, page_id, token, navigate]);
 
   const handleUpdate = async (data) => {
-    const res = await fetch(
-      `http://localhost:8000/subjects/${subject_id}/topics/${topic_id}/pages/${page_id}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(data),
-      }
-    );
+    try {
+      await fetchWithAuth(
+        `/subjects/${subject_id}/topics/${topic_id}/pages/${page_id}`,
+        token,
+        {
+          method: "PATCH",
+          body: JSON.stringify(data),
+        }
+      );
 
-    if (!res.ok) {
-      throw new Error("Error al actualizar");
+      goBack();
+    } catch (err) {
+      console.error(err);
+      alert("Error al actualizar");
     }
-
-    goBack();
   };
 
   if (loading) return <p>Cargando...</p>;
