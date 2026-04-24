@@ -9,6 +9,9 @@ from app.core.database import SessionDep
 from app.core.security import get_password_hash, verify_password
 from app.utils import utc_now
 from app.auths.dependencies import get_current_user
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -57,6 +60,8 @@ def create_user(
     user_data: UserCreate,
     session: SessionDep
 ):
+    logger.info(f"Intento de registro: {user_data.email}")
+
     if user_data.password != user_data.password2:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
@@ -73,13 +78,25 @@ def create_user(
         session.add(user)
         session.commit()
         session.refresh(user)
+
+        logger.info(f"Usuario creado correctamente: {user.email}")
         return user
     
     except IntegrityError:
         session.rollback()
+
+        logger.warning(f"Email ya registrado: {user_data.email}")
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="El email ya está registrado"
+        )
+    except Exception as e:
+        session.rollback()
+
+        logger.exception("Error inesperado en create_user")  
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error interno"
         )
 
 @router.get(

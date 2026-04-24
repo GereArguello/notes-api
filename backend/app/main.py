@@ -8,6 +8,10 @@ from app.topics import routes as topics_router
 from app.pages import routes as pages_router
 from app.tags import routes as tags_router
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
 app = FastAPI()
 
 add_pagination(app)
