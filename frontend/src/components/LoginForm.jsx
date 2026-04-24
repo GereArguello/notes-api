@@ -1,4 +1,6 @@
 import { useState } from "react";
+// TO DO: Crear fetchPublic
+import { fetchWithAuth } from "../api/fetchWithAuth";
 
 function LoginForm({ onSwitch, onLogin }) {
   const [email, setEmail] = useState("");
@@ -9,30 +11,23 @@ function LoginForm({ onSwitch, onLogin }) {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8000/auth/login", {
+      const data = await fetchWithAuth("/auth/login", null, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         body: new URLSearchParams({
-          username: email, // OAuth2 espera "username"
+          username: email,
           password: password,
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage("Error: " + JSON.stringify(data));
-        return;
-      }
-
-      
       onLogin(data.access_token);
       setMessage("Login correcto ✅");
+
     } catch (error) {
-      console.error(error);
-      setMessage("Error de conexión ❌");
+      console.error("Login error:", error);
+      setMessage(error.message || "Error de conexión ❌");
     }
   };
 

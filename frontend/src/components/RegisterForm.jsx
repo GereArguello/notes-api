@@ -1,4 +1,6 @@
 import { useState } from "react";
+// TO DO: Crear fetchPublic
+import { fetchWithAuth } from "../api/fetchWithAuth";
 
 function RegisterForm({ onSwitch }) {
   const [firstName, setFirstName] = useState("");
@@ -9,14 +11,11 @@ function RegisterForm({ onSwitch }) {
   const [message, setMessage] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // evita recarga de página
+    e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8000/users", {
+      await fetchWithAuth("/users", null, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({
           first_name: firstName,
           last_name: lastName,
@@ -26,22 +25,17 @@ function RegisterForm({ onSwitch }) {
         }),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage("Error: " + JSON.stringify(data));
-        return;
-      }
-
       setMessage("Usuario creado correctamente ✅");
 
       setTimeout(() => {
-      onSwitch();
-      }, 2000);
-      } catch (error) {
-        setMessage("Error de conexión ❌");
-      }
-    };
+        onSwitch();
+      }, 1500);
+
+    } catch (error) {
+      console.error("Register error:", error);
+      setMessage(error.message || "Error de conexión ❌");
+    }
+  };
 
   return (
     <div style={{ padding: "2rem" }}>
@@ -100,11 +94,11 @@ function RegisterForm({ onSwitch }) {
 
         <button type="submit">Crear usuario</button>
       </form>
-        
-        <p>
+
+      <p>
         ¿Ya tenés cuenta?{" "}
         <button onClick={onSwitch}>Iniciar sesión</button>
-        </p>
+      </p>
 
       {message && <p>{message}</p>}
     </div>
