@@ -1,0 +1,39 @@
+
+services:
+  db:
+    image: postgres:15
+    container_name: notes_db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: notes
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    build:
+      context: ./backend
+    container_name: notes_backend
+    depends_on:
+      - db
+    env_file:
+      - .env.docker
+    ports:
+      - "8000:8000"
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: notes_frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    restart: always
+
+volumes:
+  postgres_data:
