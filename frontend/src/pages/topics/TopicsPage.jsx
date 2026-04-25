@@ -12,7 +12,7 @@ function TopicsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchTopic = async () => {
       try {
         //  esto actualiza last_viewed_at
         await fetchWithAuth(`/subjects/${subject_id}`, token);
@@ -32,7 +32,7 @@ function TopicsPage() {
       }
     };
 
-    fetchData();
+    fetchTopic();
   }, [subject_id, token]);
 
   // 🔹 eliminar topic
@@ -65,33 +65,54 @@ function TopicsPage() {
       <h1>Temas</h1>
 
       <button onClick={() => navigate(`/subjects/${subject_id}/topics/new`)}>
-        + Crear tema
+         Crear tema
       </button>
 
       <ul>
         {topics.map((t) => (
           <li key={t.id}>
-            {t.name}
-
-            <button
-              onClick={() =>
-                navigate(`/subjects/${subject_id}/topics/${t.id}/edit`)
-              }
-            >
-              Editar
-            </button>
-
-            <button onClick={() => deleteTopic(t.id)}>
-              Eliminar
-            </button>
-
-            <button
+            <div
               onClick={() =>
                 navigate(`/subjects/${subject_id}/topics/${t.id}`)
               }
             >
-              Ver
-            </button>
+              {/*  fila principal */}
+              <div>
+                <span>
+                  <strong>{t.name}</strong>
+                </span>
+
+                <span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(
+                        `/subjects/${subject_id}/topics/${t.id}/edit`
+                      );
+                    }}
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteTopic(t.id);
+                    }}
+                  >
+                    Eliminar
+                  </button>
+                </span>
+              </div>
+
+              {/*  info secundaria */}
+              <div>
+                Última vez visto:{" "}
+                {t.last_viewed_at
+                  ? new Date(t.last_viewed_at).toLocaleString("es-AR")
+                  : "Nunca"}
+              </div>
+            </div>
           </li>
         ))}
       </ul>

@@ -80,7 +80,9 @@ function SubjectsPage() {
               {/*  info secundaria (abajo) */}
               <div>
                 Última vez visto:{" "}
-                {new Date(s.last_viewed_at).toLocaleString("es-AR")}
+                {s.last_viewed_at
+                  ? new Date(s.last_viewed_at).toLocaleString("es-AR")
+                  : "Nunca"}
               </div>
 
             </div>

@@ -15,6 +15,9 @@ function PagesPage() {
   useEffect(() => {
     const fetchPages = async () => {
       try {
+        //  esto actualiza last_viewed_at
+        await fetchWithAuth(`/subjects/${subject_id}/topics/${topic_id}`, token);
+
         const data = await fetchWithAuth(
           `/subjects/${subject_id}/topics/${topic_id}/pages`,
           token
@@ -69,38 +72,57 @@ function PagesPage() {
       {pages.length === 0 ? (
         <p>No hay páginas todavía</p>
       ) : (
-        <ul>
-          {pages.map((p) => (
-            <li key={p.id}>
-              {p.title}
+      <ul>
+        {pages.map((p) => (
+          <li key={p.id}>
+            <div
+              onClick={() =>
+                navigate(
+                  `/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}`
+                )
+              }
+            >
+              {/*  fila principal */}
+              <div>
+                <span>
+                  <strong>{p.title}</strong>
+                </span>
 
-              <button
-                onClick={() =>
-                  navigate(
-                    `/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}/edit`,
-                    { state: { from: location.pathname } }
-                  )
-                }
-              >
-                Editar
-              </button>
+                <span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(
+                        `/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}/edit`,
+                        { state: { from: location.pathname } }
+                      );
+                    }}
+                  >
+                    Editar
+                  </button>
 
-              <button onClick={() => deletePage(p.id)}>
-                Eliminar
-              </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deletePage(p.id);
+                    }}
+                  >
+                    Eliminar
+                  </button>
+                </span>
+              </div>
 
-              <button
-                onClick={() =>
-                  navigate(
-                    `/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}`
-                  )
-                }
-              >
-                Ver
-              </button>
-            </li>
-          ))}
-        </ul>
+              {/*  info secundaria */}
+              <div>
+                Última vez visto:{" "}
+                {p.last_viewed_at
+                  ? new Date(p.last_viewed_at).toLocaleString("es-AR")
+                  : "Nunca"}
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
       )}
 
       <button onClick={() => navigate(`/subjects/${subject_id}`)}>
