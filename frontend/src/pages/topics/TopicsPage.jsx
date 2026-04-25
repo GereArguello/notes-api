@@ -11,14 +11,18 @@ function TopicsPage() {
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 traer topics
   useEffect(() => {
-    const fetchTopics = async () => {
+    const fetchData = async () => {
       try {
+        //  esto actualiza last_viewed_at
+        await fetchWithAuth(`/subjects/${subject_id}`, token);
+
+        //  esto trae los topics
         const data = await fetchWithAuth(
           `/subjects/${subject_id}/topics`,
           token
         );
+
         setTopics(data.items);
       } catch (err) {
         console.error(err);
@@ -28,7 +32,7 @@ function TopicsPage() {
       }
     };
 
-    fetchTopics();
+    fetchData();
   }, [subject_id, token]);
 
   // 🔹 eliminar topic

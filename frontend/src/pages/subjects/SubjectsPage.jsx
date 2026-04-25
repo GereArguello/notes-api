@@ -48,19 +48,42 @@ function SubjectsPage() {
       <ul>
         {subjects.map((s) => (
           <li key={s.id}>
-            <strong>{s.name}</strong> — {s.difficulty_label}
+            <div onClick={() => navigate(`/subjects/${s.id}`)}>
 
-            <button onClick={() => navigate(`/subjects/${s.id}/edit`)}>
-              Editar
-            </button>
+              {/*  fila principal */}
+              <div>
+                <span>
+                  <strong>{s.name}</strong> — {s.difficulty_label}
+                </span>
 
-            <button onClick={() => deleteSubject(s.id)}>
-              Eliminar
-            </button>
+                <span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/subjects/${s.id}/edit`);
+                    }}
+                  >
+                    Editar
+                  </button>
 
-            <button onClick={() => navigate(`/subjects/${s.id}`)}>
-              Ver
-            </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteSubject(s.id);
+                    }}
+                  >
+                    Eliminar
+                  </button>
+                </span>
+              </div>
+
+              {/*  info secundaria (abajo) */}
+              <div>
+                Última vez visto:{" "}
+                {new Date(s.last_viewed_at).toLocaleString("es-AR")}
+              </div>
+
+            </div>
           </li>
         ))}
       </ul>
