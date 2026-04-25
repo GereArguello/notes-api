@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
+import ListItem from "../../components/ListItem";
 
 function SubjectsPage() {
   const [subjects, setSubjects] = useState([]);
@@ -47,46 +48,19 @@ function SubjectsPage() {
 
       <ul>
         {subjects.map((s) => (
-          <li key={s.id}>
-            <div onClick={() => navigate(`/subjects/${s.id}`)}>
-
-              {/*  fila principal */}
-              <div>
-                <span>
-                  <strong>{s.name}</strong> — {s.difficulty_label}
-                </span>
-
-                <span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/subjects/${s.id}/edit`);
-                    }}
-                  >
-                    Editar
-                  </button>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteSubject(s.id);
-                    }}
-                  >
-                    Eliminar
-                  </button>
-                </span>
-              </div>
-
-              {/*  info secundaria (abajo) */}
-              <div>
-                Última vez visto:{" "}
-                {s.last_viewed_at
-                  ? new Date(s.last_viewed_at).toLocaleString("es-AR")
-                  : "Nunca"}
-              </div>
-
-            </div>
-          </li>
+          <ListItem
+            key={s.id}
+            title={s.name}
+            subtitle={s.difficulty_label}
+            secondaryText={`Última vez visto: ${
+              s.last_viewed_at
+                ? new Date(s.last_viewed_at).toLocaleString("es-AR")
+                : "Nunca"
+            }`}
+            onClick={() => navigate(`/subjects/${s.id}`)}
+            onEdit={() => navigate(`/subjects/${s.id}/edit`)}
+            onDelete={() => deleteSubject(s.id)}
+          />
         ))}
       </ul>
 

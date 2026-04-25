@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
+import ListItem from "../../components/ListItem";
 
 function TopicsPage() {
   const { subject_id } = useParams();
@@ -70,50 +71,22 @@ function TopicsPage() {
 
       <ul>
         {topics.map((t) => (
-          <li key={t.id}>
-            <div
-              onClick={() =>
-                navigate(`/subjects/${subject_id}/topics/${t.id}`)
-              }
-            >
-              {/*  fila principal */}
-              <div>
-                <span>
-                  <strong>{t.name}</strong>
-                </span>
-
-                <span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(
-                        `/subjects/${subject_id}/topics/${t.id}/edit`
-                      );
-                    }}
-                  >
-                    Editar
-                  </button>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteTopic(t.id);
-                    }}
-                  >
-                    Eliminar
-                  </button>
-                </span>
-              </div>
-
-              {/*  info secundaria */}
-              <div>
-                Última vez visto:{" "}
-                {t.last_viewed_at
-                  ? new Date(t.last_viewed_at).toLocaleString("es-AR")
-                  : "Nunca"}
-              </div>
-            </div>
-          </li>
+          <ListItem
+            key={t.id}
+            title={t.name}
+            secondaryText={`Última vez visto: ${
+              t.last_viewed_at
+                ? new Date(t.last_viewed_at).toLocaleString("es-AR")
+                : "Nunca"
+            }`}
+            onClick={() =>
+              navigate(`/subjects/${subject_id}/topics/${t.id}`)
+            }
+            onEdit={() =>
+              navigate(`/subjects/${subject_id}/topics/${t.id}/edit`)
+            }
+            onDelete={() => deleteTopic(t.id)}
+          />
         ))}
       </ul>
 

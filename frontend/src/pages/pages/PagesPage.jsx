@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
+import ListItem from "../../components/ListItem";
 
 function PagesPage() {
   const { subject_id, topic_id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const { token } = useAuth();
 
   const [pages, setPages] = useState([]);
@@ -74,53 +74,22 @@ function PagesPage() {
       ) : (
       <ul>
         {pages.map((p) => (
-          <li key={p.id}>
-            <div
-              onClick={() =>
-                navigate(
-                  `/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}`
-                )
-              }
-            >
-              {/*  fila principal */}
-              <div>
-                <span>
-                  <strong>{p.title}</strong>
-                </span>
-
-                <span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(
-                        `/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}/edit`,
-                        { state: { from: location.pathname } }
-                      );
-                    }}
-                  >
-                    Editar
-                  </button>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deletePage(p.id);
-                    }}
-                  >
-                    Eliminar
-                  </button>
-                </span>
-              </div>
-
-              {/*  info secundaria */}
-              <div>
-                Última vez visto:{" "}
-                {p.last_viewed_at
-                  ? new Date(p.last_viewed_at).toLocaleString("es-AR")
-                  : "Nunca"}
-              </div>
-            </div>
-          </li>
+          <ListItem
+            key={p.id}
+            title={p.title}
+            secondaryText={`Última vez visto: ${
+              p.last_viewed_at
+                ? new Date(p.last_viewed_at).toLocaleString("es-AR")
+                : "Nunca"
+            }`}
+            onClick={() =>
+              navigate(`/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}`)
+            }
+            onEdit={() =>
+              navigate(`/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}/edit`)
+            }
+            onDelete={() => deletePage(p.id)}
+          />
         ))}
       </ul>
       )}
