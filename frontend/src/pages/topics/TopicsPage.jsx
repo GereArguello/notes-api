@@ -79,6 +79,7 @@ function TopicsPage() {
                 ? new Date(t.last_viewed_at).toLocaleString("es-AR")
                 : "Nunca"
             }`}
+            variant="list"
             onClick={() =>
               navigate(`/subjects/${subject_id}/topics/${t.id}`)
             }

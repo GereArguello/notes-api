@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import ListItem from "../../components/ListItem";
+import "./SubjectsPage.css";
 
 function SubjectsPage() {
   const [subjects, setSubjects] = useState([]);
@@ -39,24 +40,26 @@ function SubjectsPage() {
   };
 
   return (
-    <div>
-      <h1>Mis materias</h1>
+    <div className="page-container">
+      <h1 className="subjects-title">Mis materias</h1>
 
       <button onClick={() => navigate("/subjects/new")}>
         Crear materia
       </button>
 
-      <ul>
+      <ul className="subjects-grid">
         {subjects.map((s) => (
           <ListItem
             key={s.id}
             title={s.name}
             subtitle={s.difficulty_label}
-            secondaryText={`Última vez visto: ${
+            description={s.description}
+            secondaryText={
               s.last_viewed_at
                 ? new Date(s.last_viewed_at).toLocaleString("es-AR")
                 : "Nunca"
-            }`}
+            }
+            variant="grid"
             onClick={() => navigate(`/subjects/${s.id}`)}
             onEdit={() => navigate(`/subjects/${s.id}/edit`)}
             onDelete={() => deleteSubject(s.id)}

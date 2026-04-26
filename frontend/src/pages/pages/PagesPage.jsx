@@ -82,6 +82,7 @@ function PagesPage() {
                 ? new Date(p.last_viewed_at).toLocaleString("es-AR")
                 : "Nunca"
             }`}
+            variant="list"
             onClick={() =>
               navigate(`/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}`)
             }

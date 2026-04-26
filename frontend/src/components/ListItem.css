@@ -1,0 +1,144 @@
+/* 🔹 BASE (para todos) */
+.list-item {
+  border-radius: 10px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* 🔲 SUBJECTS (cards) */
+.list-item-grid {
+  background-color: #fffaf3;
+  border: 1px solid #e0d6c3;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  aspect-ratio: 1 / 1; /* 🔥 solo acá */
+}
+
+
+/* 📄 LISTA (topics/pages) */
+.list-item-list {
+  display: flex;
+  flex-direction: column;
+
+  border-bottom: 1px solid #e0d6c3;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+.list-item-grid:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.list-item:hover {
+  transform: translateY(-3px);
+}
+
+.list-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  flex: 1; /* 🔥 CLAVE */
+}
+
+.list-item-title {
+  font-size: 1.1rem;
+}
+
+.list-item-subtitle {
+  color: #6b4f3a;
+}
+
+.list-item-description {
+  margin-top: 0.4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+  overflow: hidden;
+
+  font-size: 0.9rem;
+  color: #5f5645;
+}
+
+/* 🔹 wrapper */
+.list-item-description-wrapper {
+  position: relative;
+}
+
+/* 🔹 tooltip oculto */
+.list-item-tooltip {
+  position: absolute;
+  top: -65px;
+  right: 10px;
+
+  transform: translateY(-100%);
+  
+  background-color: #2f2a24; /* más moderno */
+  color: #fff;
+  
+  padding: 0.5rem 0.7rem;
+  border-radius: 6px;
+  
+  font-size: 0.85rem;
+  line-height: 1.3;
+
+  width: 200px;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 0.2s ease;
+
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* 🔥 mostrar en hover */
+.list-item-description-wrapper:hover .list-item-tooltip {
+  opacity: 1;
+}
+
+.list-item-secondary {
+  margin-top: auto;
+  font-size: 0.85rem;
+  color: #7a6f5a;
+  text-align: center;
+}
+
+/* etiqueta */
+.list-item-secondary-label {
+  font-size: 0.8rem;
+  color: #7a6f5a;
+}
+
+/* fecha */
+.list-item-secondary-date {
+  font-size: 0.9rem;
+  color: #5f5645;
+}
+
+/* 🔹 acciones */
+.list-item-actions {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #e0d6c3;
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.list-item-actions button {
+  flex: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b4f3a;
+}
+
+.list-item-actions button:hover {
+  text-decoration: underline;
+}
