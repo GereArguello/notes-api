@@ -285,8 +285,6 @@ def update_subject(
     
     update_data = subject_data.model_dump(exclude_unset=True)
 
-    if "name" in update_data and subject.name == update_data["name"]:
-        return subject
 
     subject.sqlmodel_update(update_data)
 

@@ -6,8 +6,8 @@ export async function fetchWithAuth(endpoint, token, options = {}) {
   const res = await fetch(url, {
     ...options,
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
+      ...(options.body && { "Content-Type": "application/json" }),
       ...options.headers,
     },
   });
@@ -15,6 +15,8 @@ export async function fetchWithAuth(endpoint, token, options = {}) {
   if (!res.ok) {
     throw new Error(`Error ${res.status}`);
   }
+
+  if (res.status === 204) return null;
 
   return res.json();
 }
