@@ -42,34 +42,35 @@ function SubjectsPage() {
   return (
     <div className="page-container">
       <h1 className="subjects-title">Mis materias</h1>
+      <div className="card-container">
+        <button onClick={() => navigate("/subjects/new")}>
+          Crear materia
+        </button>
 
-      <button onClick={() => navigate("/subjects/new")}>
-        Crear materia
-      </button>
+        <ul className="subjects-grid">
+          {subjects.map((s) => (
+            <ListItem
+              key={s.id}
+              title={s.name}
+              subtitle={s.difficulty_label}
+              description={s.description}
+              secondaryText={
+                s.last_viewed_at
+                  ? new Date(s.last_viewed_at).toLocaleString("es-AR")
+                  : "Nunca"
+              }
+              variant="grid"
+              onClick={() => navigate(`/subjects/${s.id}`)}
+              onEdit={() => navigate(`/subjects/${s.id}/edit`)}
+              onDelete={() => deleteSubject(s.id)}
+            />
+          ))}
+        </ul>
 
-      <ul className="subjects-grid">
-        {subjects.map((s) => (
-          <ListItem
-            key={s.id}
-            title={s.name}
-            subtitle={s.difficulty_label}
-            description={s.description}
-            secondaryText={
-              s.last_viewed_at
-                ? new Date(s.last_viewed_at).toLocaleString("es-AR")
-                : "Nunca"
-            }
-            variant="grid"
-            onClick={() => navigate(`/subjects/${s.id}`)}
-            onEdit={() => navigate(`/subjects/${s.id}/edit`)}
-            onDelete={() => deleteSubject(s.id)}
-          />
-        ))}
-      </ul>
-
-      <button onClick={logout}>
-        Logout
-      </button>
+        <button onClick={logout}>
+          Logout
+        </button>
+      </div>
     </div>
   );
 }

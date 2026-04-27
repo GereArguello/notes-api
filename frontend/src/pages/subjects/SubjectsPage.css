@@ -3,13 +3,6 @@ body {
   font-family: Arial, sans-serif;
 }
 
-.page-container {
-  max-width: 900px;
-  margin: 2rem auto;
-  padding: 2rem;
-  background-color: #fdfaf5;
-  border-radius: 12px;
-}
 
 
 .subjects-title {

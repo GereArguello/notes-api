@@ -62,38 +62,39 @@ function TopicsPage() {
   if (loading) return <p>Cargando...</p>;
 
   return (
-    <div>
+    <div className="page-container">
       <h1>Temas</h1>
+      <div className="list-container">
+        <button onClick={() => navigate(`/subjects/${subject_id}/topics/new`)}>
+          Crear tema
+        </button>
 
-      <button onClick={() => navigate(`/subjects/${subject_id}/topics/new`)}>
-         Crear tema
-      </button>
+        <ul>
+          {topics.map((t) => (
+            <ListItem
+              key={t.id}
+              title={t.name}
+              secondaryText={`${
+                t.last_viewed_at
+                  ? new Date(t.last_viewed_at).toLocaleString("es-AR")
+                  : "Nunca"
+              }`}
+              variant="list"
+              onClick={() =>
+                navigate(`/subjects/${subject_id}/topics/${t.id}`)
+              }
+              onEdit={() =>
+                navigate(`/subjects/${subject_id}/topics/${t.id}/edit`)
+              }
+              onDelete={() => deleteTopic(t.id)}
+            />
+          ))}
+        </ul>
 
-      <ul>
-        {topics.map((t) => (
-          <ListItem
-            key={t.id}
-            title={t.name}
-            secondaryText={`Última vez visto: ${
-              t.last_viewed_at
-                ? new Date(t.last_viewed_at).toLocaleString("es-AR")
-                : "Nunca"
-            }`}
-            variant="list"
-            onClick={() =>
-              navigate(`/subjects/${subject_id}/topics/${t.id}`)
-            }
-            onEdit={() =>
-              navigate(`/subjects/${subject_id}/topics/${t.id}/edit`)
-            }
-            onDelete={() => deleteTopic(t.id)}
-          />
-        ))}
-      </ul>
-
-      <button onClick={() => navigate(`/subjects`)}>
-        Volver atrás
-      </button>
+        <button onClick={() => navigate(`/subjects`)}>
+          Volver atrás
+        </button>
+      </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@
   transition: all 0.2s ease;
 }
 
+
 /* 🔲 SUBJECTS (cards) */
 .list-item-grid {
   background-color: #fffaf3;
@@ -21,12 +22,66 @@
 
 /* 📄 LISTA (topics/pages) */
 .list-item-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  align-items: center;
+  gap: 1rem;
+
+  min-height: 56px;
+  padding: 0.2rem 1rem;
 
   border-bottom: 1px solid #e0d6c3;
   border-radius: 0;
   background-color: transparent;
+}
+
+.list-item-list > * {
+  display: flex;
+  align-items: center;
+}
+
+/* Solo el contenido cuando está en modo lista */
+.list-item-list .list-item-content {
+  flex: initial;
+  gap: 0.15rem;
+  justify-content: center;
+}
+
+/* Solo el título en modo lista */
+.list-item-list .list-item-title {
+  font-size: 1.05rem;
+  text-align: left;
+}
+
+/* Solo descripción en modo lista */
+.list-item-list .list-item-description {
+  margin-top: 0.15rem;
+  -webkit-line-clamp: 1;
+}
+
+/* Solo secondary en modo lista */
+.list-item-list .list-item-secondary {
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+}
+
+/* Solo acciones en modo lista */
+.list-item-list .list-item-actions {
+  font-size: 0.85rem;
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+
+  min-width: 160px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 1.2rem;
+}
+
+.list-item-list:hover {
+  background-color: #fffaf3;
 }
 
 .list-item-grid:hover {

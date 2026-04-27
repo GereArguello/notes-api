@@ -56,48 +56,49 @@ function PagesPage() {
   if (loading) return <p>Cargando...</p>;
 
   return (
-    <div>
+    <div className="page-container">
       <h1>Páginas</h1>
+      <div className="list-container">
+        <button
+          onClick={() =>
+            navigate(
+              `/subjects/${subject_id}/topics/${topic_id}/pages/new`
+            )
+          }
+        >
+          Crear página
+        </button>
 
-      <button
-        onClick={() =>
-          navigate(
-            `/subjects/${subject_id}/topics/${topic_id}/pages/new`
-          )
-        }
-      >
-        Crear página
-      </button>
+        {pages.length === 0 ? (
+          <p>No hay páginas todavía</p>
+        ) : (
+        <ul>
+          {pages.map((p) => (
+            <ListItem
+              key={p.id}
+              title={p.title}
+              secondaryText={`${
+                p.last_viewed_at
+                  ? new Date(p.last_viewed_at).toLocaleString("es-AR")
+                  : "Nunca"
+              }`}
+              variant="list"
+              onClick={() =>
+                navigate(`/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}`)
+              }
+              onEdit={() =>
+                navigate(`/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}/edit`)
+              }
+              onDelete={() => deletePage(p.id)}
+            />
+          ))}
+        </ul>
+        )}
 
-      {pages.length === 0 ? (
-        <p>No hay páginas todavía</p>
-      ) : (
-      <ul>
-        {pages.map((p) => (
-          <ListItem
-            key={p.id}
-            title={p.title}
-            secondaryText={`Última vez visto: ${
-              p.last_viewed_at
-                ? new Date(p.last_viewed_at).toLocaleString("es-AR")
-                : "Nunca"
-            }`}
-            variant="list"
-            onClick={() =>
-              navigate(`/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}`)
-            }
-            onEdit={() =>
-              navigate(`/subjects/${subject_id}/topics/${topic_id}/pages/${p.id}/edit`)
-            }
-            onDelete={() => deletePage(p.id)}
-          />
-        ))}
-      </ul>
-      )}
-
-      <button onClick={() => navigate(`/subjects/${subject_id}`)}>
-        Volver a temas
-      </button>
+        <button onClick={() => navigate(`/subjects/${subject_id}`)}>
+          Volver a temas
+        </button>
+      </div>
     </div>
   );
 }
