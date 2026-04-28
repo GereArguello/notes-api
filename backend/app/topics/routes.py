@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends, HTTPException, Request
 from sqlmodel import select
 from sqlalchemy.exc import IntegrityError
 
@@ -16,6 +16,7 @@ from app.topics.services import (get_max_order_or_0,
                                 get_topics_to_reorder)
 
 from app.utils import utc_now, shift_items
+from app.core.limiter import limiter
 
 router = APIRouter(tags=["topics"])
 
@@ -68,7 +69,9 @@ Crea un nuevo tema dentro de una materia del usuario autenticado.
         }
     }
 )
+@limiter.limit("60/minute")
 def create_topic(
+    request: Request,
     topic: TopicCreate,
     session: SessionDep,
     subject: Subject = Depends(get_user_subject)
@@ -142,7 +145,9 @@ Retorna una lista paginada de los temas pertenecientes a una materia del usuario
         }
     }
 )
+@limiter.limit("60/minute")
 def list_topics(
+    request: Request,
     session: SessionDep,
     subject: Subject = Depends(get_user_subject),
     params: TopicPagination = Depends()
@@ -201,7 +206,9 @@ Retorna el tema con todos sus campos, incluyendo timestamps relevantes
         }
     }
 )
+@limiter.limit("60/minute")
 def read_topic(
+    request: Request,
     session: SessionDep,
     topic: Topic = Depends(get_user_topic),
 ):
@@ -271,7 +278,9 @@ Actualiza parcialmente un tema de una materia del usuario autenticado.
         }
     }
 )
+@limiter.limit("60/minute")
 def update_topic(
+    request: Request,
     session: SessionDep,
     topic_data: TopicUpdate,
     topic: Topic = Depends(get_user_topic),
@@ -369,7 +378,9 @@ Retorna el tema con su nueva posición (`sort_order`)
         }
     }
 )
+@limiter.limit("60/minute")
 def re_order_topic(
+    request: Request,
     order_data: TopicReOrder,
     session: SessionDep,
     topic: Topic = Depends(get_user_topic),
@@ -474,7 +485,9 @@ Y se elimina el tema con orden 2:
         }
     }
 )
+@limiter.limit("60/minute")
 def delete_topic(
+    request: Request,
     session: SessionDep,
     topic: Topic = Depends(get_user_topic),
 ):

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
+import { getErrorMessage } from "../../utils/errorMessage";
+import { showAlertOnce } from "../../utils/showAlertOnce";
 
 function PageDetailPage() {
   const { subject_id, topic_id, page_id } = useParams();
@@ -22,7 +24,7 @@ function PageDetailPage() {
         setPage(data);
       } catch (err) {
         console.error(err);
-        alert("Error al cargar página");
+        showAlertOnce(getErrorMessage(err, "Error al cargar la pagina"));
         navigate(`/subjects/${subject_id}/topics/${topic_id}`);
       } finally {
         setLoading(false);

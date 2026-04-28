@@ -3,6 +3,8 @@ import PageForm from "../../components/PageForm";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import SectionHeader from "../../components/SectionHeader";
+import { getErrorMessage } from "../../utils/errorMessage";
+import { showAlertOnce } from "../../utils/showAlertOnce";
 
 function CreatePagePage() {
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ function CreatePagePage() {
       navigate(`/subjects/${subject_id}/topics/${topic_id}`);
     } catch (err) {
       console.error(err);
-      alert("Error al crear pagina");
+      showAlertOnce(getErrorMessage(err, "Error al crear la pagina"));
     }
   };
 

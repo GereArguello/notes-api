@@ -4,6 +4,8 @@ import PageForm from "../../components/PageForm";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import SectionHeader from "../../components/SectionHeader";
+import { getErrorMessage } from "../../utils/errorMessage";
+import { showAlertOnce } from "../../utils/showAlertOnce";
 
 function EditPagePage() {
   const { subject_id, topic_id, page_id } = useParams();
@@ -32,7 +34,7 @@ function EditPagePage() {
         setPage(data);
       } catch (err) {
         console.error(err);
-        alert("Error al cargar pagina");
+        showAlertOnce(getErrorMessage(err, "Error al cargar la pagina"));
         navigate(`/subjects/${subject_id}/topics/${topic_id}`);
       } finally {
         setLoading(false);
@@ -56,7 +58,7 @@ function EditPagePage() {
       goBack();
     } catch (err) {
       console.error(err);
-      alert("Error al actualizar");
+      showAlertOnce(getErrorMessage(err, "Error al actualizar la pagina"));
     }
   };
 

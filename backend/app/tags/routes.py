@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends, HTTPException, Request
 from sqlmodel import select
 from app.core.database import SessionDep
 from app.auths.dependencies import get_current_user
@@ -10,6 +10,7 @@ from app.tags.models import Tag
 from app.tags.services import get_tag_or_create
 from app.page_tags.services import attach_tag_to_page
 from app.page_tags.models import PageTagLink
+from app.core.limiter import limiter
 
 
 
@@ -59,7 +60,9 @@ Retorna el tag asociado
         404: {"description": "Página, tema o materia no encontrada"},
     }
 )
+@limiter.limit("60/minute")
 def create_tag(
+    request: Request,
     data: TagCreate,
     session: SessionDep,
     page: Page = Depends(get_user_page)
@@ -109,7 +112,9 @@ Retorna una lista de tags
         401: {"description": "No autenticado o token inválido"}
     }
 )
+@limiter.limit("60/minute")
 def list_tags(
+    request: Request,
     session: SessionDep,
     search: str | None = None,
     current_user: User = Depends(get_current_user),
@@ -159,7 +164,9 @@ Elimina la asociación entre un tag y una página del usuario autenticado.
         404: {"description": "Relación página-tag no encontrada"}
     }
 )
+@limiter.limit("60/minute")
 def delete_page_tag(
+    request: Request,
     tag_id: int,
     session: SessionDep,
     page: Page = Depends(get_user_page),

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends, HTTPException, Request
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select, desc
 from typing import Literal
@@ -13,6 +13,7 @@ from app.subjects.dependencies import get_user_subject
 from app.core.database import SessionDep
 from app.core.pagination import SubjectPagination
 from app.auths.dependencies import get_current_user
+from app.core.limiter import limiter
 from app.users.models import User
 from app.utils import utc_now
 
@@ -72,7 +73,9 @@ Valores posibles:
         }
     }
 )
+@limiter.limit("60/minute")
 def create_subject(
+    request: Request,
     subject: SubjectCreate,
     session: SessionDep,
     current_user: User = Depends(get_current_user),
@@ -143,7 +146,9 @@ Retorna una lista paginada de las materias del usuario autenticado.
         }
     }
 )
+@limiter.limit("60/minute")
 def list_subjects(
+    request: Request,
     session: SessionDep,
     order: Literal["desc", "asc"] = "desc",
     current_user: User = Depends(get_current_user),
@@ -201,7 +206,9 @@ Retorna la materia con todos sus campos, incluyendo:
         }
     }
 )
+@limiter.limit("60/minute")
 def read_subject(
+    request: Request,
     session: SessionDep,
     subject: Subject = Depends(get_user_subject),
 ):
@@ -264,7 +271,9 @@ Actualiza parcialmente una materia del usuario autenticado.
         }
     }
 )
+@limiter.limit("60/minute")
 def update_subject(
+    request: Request,
     session: SessionDep,
     subject_id: int,
     subject_data: SubjectUpdate,
@@ -340,7 +349,9 @@ Elimina una materia del usuario autenticado.
         }
     }
 )
+@limiter.limit("60/minute")
 def delete_subject(
+    request: Request,
     session: SessionDep,
     subject_id: int,
     current_user: User = Depends(get_current_user)

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends, HTTPException, Request
 from sqlmodel import select
 from sqlalchemy.exc import IntegrityError
 
@@ -14,6 +14,7 @@ from app.topics.dependencies import get_user_topic
 from app.pages.dependencies import get_user_page
 from app.pages.services import get_max_order_or_0, get_pages_to_reorder
 from app.utils import utc_now, shift_items
+from app.core.limiter import limiter
 
 
 router = APIRouter(tags=["pages"])
@@ -59,7 +60,9 @@ Crea una nueva página dentro de un tema del usuario autenticado.
         409: {"description": "Ya existe una página con ese nombre"}
     }
 )
+@limiter.limit("60/minute")
 def create_page(
+    request: Request,
     page_data: PageCreate,
     session: SessionDep,
     topic: Topic = Depends(get_user_topic),
@@ -127,7 +130,9 @@ Retorna una lista paginada de las páginas de un tema del usuario autenticado.
         404: {"description": "Tema o materia no encontrada"}
     }
 )
+@limiter.limit("60/minute")
 def list_pages(
+    request: Request,
     session: SessionDep,
     topic: Topic = Depends(get_user_topic),
     params: PagePagination = Depends()
@@ -179,7 +184,9 @@ Retorna la página con todos sus campos
         404: {"description": "Página, tema o materia no encontrada"}
     }
 )
+@limiter.limit("60/minute")
 def read_page(
+    request: Request,
     session: SessionDep,
     page: Page = Depends(get_user_page),
 ):
@@ -241,7 +248,9 @@ Actualiza parcialmente una página de un tema del usuario autenticado.
         409: {"description": "Ya existe una página con ese título"}
     }
 )
+@limiter.limit("60/minute")
 def update_page(
+    request: Request,
     page_data: PageUpdate,
     session: SessionDep,
     page: Page = Depends(get_user_page)
@@ -322,7 +331,9 @@ Retorna la página con su nueva posición
         409: {"description": "Conflicto al reordenar las páginas"}
     }
 )
+@limiter.limit("60/minute")
 def re_order_page(
+    request: Request,
     session: SessionDep,
     order_data: PageReOrder,
     page: Page = Depends(get_user_page)
@@ -421,7 +432,9 @@ Y se elimina la página con orden 2:
         404: {"description": "Página, tema o materia no encontrada"}
     }
 )
+@limiter.limit("60/minute")
 def delete_page(
+    request: Request,
     session: SessionDep,
     page: Page = Depends(get_user_page)
 ): 

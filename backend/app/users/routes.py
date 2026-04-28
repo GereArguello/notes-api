@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, status, Depends, Request
 from sqlalchemy.exc import IntegrityError
 from app.users.schemas import UserCreate, UserRead, UserUpdate, UserUpdatePassword
 from app.users.models import User
@@ -9,6 +9,7 @@ from app.core.database import SessionDep
 from app.core.security import get_password_hash, verify_password
 from app.utils import utc_now
 from app.auths.dependencies import get_current_user
+from app.core.limiter import limiter
 import logging
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,9 @@ Crea un nuevo usuario en el sistema.
         }
     }
 )
+@limiter.limit("10/minute")
 def create_user(
+    request: Request,
     user_data: UserCreate,
     session: SessionDep
 ):
@@ -130,7 +133,8 @@ Retorna la información del usuario autenticado.
         }
     }
 )
-def read_me(current_user: User = Depends(get_current_user)):
+@limiter.limit("60/minute")
+def read_me(request: Request, current_user: User = Depends(get_current_user)):
     return current_user
 
 @router.patch(
@@ -174,7 +178,8 @@ Actualiza parcialmente los datos del usuario autenticado.
         }
     }
 )
-def update_user(update_data: UserUpdate, session: SessionDep, current_user: User = Depends(get_current_user)):
+@limiter.limit("60/minute")
+def update_user(request: Request, update_data: UserUpdate, session: SessionDep, current_user: User = Depends(get_current_user)):
     
     if not update_data.model_dump(exclude_unset=True):
         raise HTTPException(
@@ -234,7 +239,9 @@ Actualiza la contraseña del usuario autenticado.
         }
     }
 )
+@limiter.limit("60/minute")
 def update_password(
+                    request: Request,
                     password_data: UserUpdatePassword,
                     session: SessionDep,
                     current_user: User = Depends(get_current_user)
@@ -300,7 +307,8 @@ Desactiva la cuenta del usuario autenticado (soft delete).
         }
     }
 )
-def deactivate_user(session: SessionDep, current_user: User = Depends(get_current_user)):
+@limiter.limit("60/minute")
+def deactivate_user(request: Request, session: SessionDep, current_user: User = Depends(get_current_user)):
         
     if not current_user.deleted_at:
         current_user.deleted_at = utc_now()
@@ -342,7 +350,8 @@ Elimina permanentemente la cuenta del usuario autenticado (hard delete).
         }
     }
 )
-def delete_user(session: SessionDep, current_user: User = Depends(get_current_user)):
+@limiter.limit("60/minute")
+def delete_user(request: Request, session: SessionDep, current_user: User = Depends(get_current_user)):
 
     revoke_all_refresh_tokens(current_user.id, session)
 

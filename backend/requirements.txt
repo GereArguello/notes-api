@@ -5,3 +5,4 @@ psycopg2-binary==2.9.11
 bcrypt==5.0.0
 python-jose==3.5.0
 fastapi-pagination==0.15.11
+slowapi==0.1.9

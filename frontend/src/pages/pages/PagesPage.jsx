@@ -4,6 +4,8 @@ import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import ListItem from "../../components/ListItem";
 import SectionHeader from "../../components/SectionHeader";
+import { getErrorMessage } from "../../utils/errorMessage";
+import { showAlertOnce } from "../../utils/showAlertOnce";
 
 function PagesPage() {
   const { subject_id, topic_id } = useParams();
@@ -25,7 +27,7 @@ function PagesPage() {
         setPages(data.items || []);
       } catch (err) {
         console.error(err);
-        alert("Error al cargar paginas");
+        showAlertOnce(getErrorMessage(err, "Error al cargar paginas"));
       } finally {
         setLoading(false);
       }
@@ -49,7 +51,7 @@ function PagesPage() {
       setPages((prev) => prev.filter((p) => p.id !== page_id));
     } catch (err) {
       console.error(err);
-      alert("Error al eliminar pagina");
+      showAlertOnce(getErrorMessage(err, "Error al eliminar la pagina"));
     }
   };
 

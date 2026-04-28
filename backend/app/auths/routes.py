@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Cookie, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime, timezone
 
 from app.core.config import settings
 from app.core.database import  SessionDep
+from app.core.limiter import limiter
 from app.core.security import decode_token
 from app.auths.service import (authenticate_user,
                                generate_auth_tokens,
@@ -47,7 +48,8 @@ Autentica un usuario utilizando email y contraseña.
         }
     }
 )
-def login(response: Response, session: SessionDep, form_data: OAuth2PasswordRequestForm = Depends()):
+@limiter.limit("5/minute")
+def login(request: Request, response: Response, session: SessionDep, form_data: OAuth2PasswordRequestForm = Depends()):
     
     user = authenticate_user(
         session=session,
@@ -136,7 +138,9 @@ Se utiliza cuando el `access_token` expira.
         }
     }
 )
+@limiter.limit("15/minute")
 def refresh_token(
+    request: Request,
     session: SessionDep,
     response: Response,
     refresh_token: str = Cookie(None),
