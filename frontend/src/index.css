@@ -135,7 +135,6 @@ form div {
 
 .login-container {
   padding: var(--padding);
-}
   font-weight: 500;
   color: var(--text-h);
 }
