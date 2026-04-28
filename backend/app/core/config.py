@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
     SECRET_KEY: str
     DATABASE_URL: str
@@ -7,7 +8,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    COOKIE_SECURE: bool = True # Producción
+    COOKIE_SECURE: bool = True
+    COOKIE_SAMESITE: str = "lax"
     REFRESH_TOKEN_GRACE_PERIOD: int = 2
 
     ENVIRONMENT: str = "development"
@@ -15,7 +17,8 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=".env",
-        env_file_encoding="utf-8"
+        env_file_encoding="utf-8",
     )
+
 
 settings = Settings()

@@ -3,6 +3,7 @@ import bcrypt
 from jose import jwt
 from jose.exceptions import JWTError
 from datetime import datetime, timedelta, timezone
+from uuid import uuid4
 from app.core.config import settings
 
 def get_password_hash(password: str) -> str:
@@ -26,9 +27,12 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def create_access_token(data: dict, expires_delta: timedelta):
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + expires_delta
+    issued_at = datetime.now(timezone.utc)
+    expire = issued_at + expires_delta
     to_encode.update({
         "exp": expire,
+        "iat": issued_at,
+        "jti": str(uuid4()),
         "type": "access"
         })
     
@@ -36,10 +40,13 @@ def create_access_token(data: dict, expires_delta: timedelta):
 
 def create_refresh_token(data: dict, expires_delta: timedelta):
     to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + expires_delta
+    issued_at = datetime.now(timezone.utc)
+    expire = issued_at + expires_delta
 
     to_encode.update({
         "exp": expire,
+        "iat": issued_at,
+        "jti": str(uuid4()),
         "type": "refresh"
     })
 

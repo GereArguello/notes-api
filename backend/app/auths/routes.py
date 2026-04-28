@@ -84,7 +84,7 @@ def login(response: Response, session: SessionDep, form_data: OAuth2PasswordRequ
         value=refresh_token,
         httponly=True,
         secure=settings.COOKIE_SECURE,
-        samesite="none",
+        samesite=settings.COOKIE_SAMESITE,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
     )
 
@@ -212,7 +212,7 @@ def refresh_token(
         value=new_refresh_token,
         httponly=True,
         secure=settings.COOKIE_SECURE,
-        samesite="none",
+        samesite=settings.COOKIE_SAMESITE,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60
     )
 
@@ -304,7 +304,7 @@ def logout(
     response.delete_cookie(
         key="refresh_token",
         secure=settings.COOKIE_SECURE,
-        samesite="none"
+        samesite=settings.COOKIE_SAMESITE
     )
 
     return

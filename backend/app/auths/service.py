@@ -1,4 +1,4 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, select, desc
 from app.users.models import User
 from app.auths.models import RefreshToken
 from app.core.security import (verify_password,
@@ -45,7 +45,7 @@ def get_refresh_token(refresh_token: str, session: SessionDep) -> RefreshToken |
     return session.exec(
         select(RefreshToken).where(
             RefreshToken.token == refresh_token
-        )
+        ).order_by(desc(RefreshToken.id))
     ).first()
 
 def is_token_revoked(token: RefreshToken) -> bool:
