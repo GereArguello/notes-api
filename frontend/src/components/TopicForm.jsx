@@ -22,7 +22,7 @@ function TopicForm({ initialData, onSubmit, buttonText, onCancel }) {
     };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="entity-form">
       <h2>{buttonText}</h2>
 
       <input
@@ -33,12 +33,14 @@ function TopicForm({ initialData, onSubmit, buttonText, onCancel }) {
         required
       />
 
-      <button type="submit">{buttonText}</button>
-      <button type="button" onClick={onCancel}>
-        Cancelar
-      </button>
+      <div className="form-actions">
+        <button type="submit">{buttonText}</button>
+        <button type="button" onClick={onCancel}>
+          Cancelar
+        </button>
+      </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="form-error">{error}</p>}
     </form>
   );
 }

@@ -25,7 +25,7 @@ function PageForm({ initialData, onSubmit, buttonText, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="entity-form">
       <h2>{buttonText}</h2>
 
       <input
@@ -43,13 +43,14 @@ function PageForm({ initialData, onSubmit, buttonText, onCancel }) {
         rows={15}
       />
 
-      <button type="submit">{buttonText}</button>
+      <div className="form-actions">
+        <button type="submit">{buttonText}</button>
+        <button type="button" onClick={onCancel}>
+          Cancelar
+        </button>
+      </div>
 
-      <button type="button" onClick={onCancel}>
-        Cancelar
-      </button>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="form-error">{error}</p>}
     </form>
   );
 }

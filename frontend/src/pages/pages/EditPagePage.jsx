@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import PageForm from "../../components/PageForm";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
+import SectionHeader from "../../components/SectionHeader";
 
 function EditPagePage() {
   const { subject_id, topic_id, page_id } = useParams();
@@ -31,7 +32,7 @@ function EditPagePage() {
         setPage(data);
       } catch (err) {
         console.error(err);
-        alert("Error al cargar página");
+        alert("Error al cargar pagina");
         navigate(`/subjects/${subject_id}/topics/${topic_id}`);
       } finally {
         setLoading(false);
@@ -62,8 +63,11 @@ function EditPagePage() {
   if (loading) return <p>Cargando...</p>;
 
   return (
-    <div>
-      <h1>Editar página</h1>
+    <div className="form-page">
+      <SectionHeader
+        title="Editar pagina"
+        subtitle="Puli el contenido y mantene tus apuntes claros y legibles."
+      />
 
       <PageForm
         initialData={page}

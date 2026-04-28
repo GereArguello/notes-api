@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import TopicForm from "../../components/TopicForm";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
+import SectionHeader from "../../components/SectionHeader";
 
 function EditTopicPage() {
   const { subject_id, topic_id } = useParams();
@@ -54,8 +55,11 @@ function EditTopicPage() {
   if (loading) return <p>Cargando...</p>;
 
   return (
-    <div>
-      <h1>Editar tema</h1>
+    <div className="form-page">
+      <SectionHeader
+        title="Editar tema"
+        subtitle="Reordená el foco del tema antes de seguir agregando páginas."
+      />
 
       <TopicForm
         initialData={topic}

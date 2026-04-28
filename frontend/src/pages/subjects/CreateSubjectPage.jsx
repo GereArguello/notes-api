@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import SubjectForm from "../../components/SubjectForm";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
+import SectionHeader from "../../components/SectionHeader";
 
 function CreateSubjectPage() {
   const navigate = useNavigate();
@@ -22,8 +23,11 @@ function CreateSubjectPage() {
   };
 
   return (
-    <div>
-      <h1>Crear materia</h1>
+    <div className="form-page">
+      <SectionHeader
+        title="Crear materia"
+        subtitle="Definí una base clara para empezar a ordenar tus temas."
+      />
 
       <SubjectForm
         buttonText="Crear"

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function SubjectForm({ initialData, onSubmit, buttonText, onCancel }) {
   const [name, setName] = useState("");
@@ -6,7 +6,6 @@ function SubjectForm({ initialData, onSubmit, buttonText, onCancel }) {
   const [difficulty, setDifficulty] = useState(1);
   const [error, setError] = useState(null);
 
-  // 🔹 cargar datos si estamos editando
   useEffect(() => {
     if (initialData) {
       setName(initialData.name || "");
@@ -28,7 +27,7 @@ function SubjectForm({ initialData, onSubmit, buttonText, onCancel }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="entity-form">
       <h2>{buttonText}</h2>
 
       <input
@@ -39,30 +38,35 @@ function SubjectForm({ initialData, onSubmit, buttonText, onCancel }) {
         required
       />
 
-      <input
-        type="text"
-        placeholder="Descripción"
+      <textarea
+        placeholder="Descripcion"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
+        rows={4}
       />
 
-      <select
-        value={difficulty}
-        onChange={(e) => setDifficulty(Number(e.target.value))}
-      >
-        <option value={1}>Muy fácil</option>
-        <option value={2}>Fácil</option>
-        <option value={3}>Media</option>
-        <option value={4}>Difícil</option>
-        <option value={5}>Muy difícil</option>
-      </select>
+      <label className="field-group">
+        <span>Dificultad</span>
+        <select
+          value={difficulty}
+          onChange={(e) => setDifficulty(Number(e.target.value))}
+        >
+          <option value={1}>Muy facil</option>
+          <option value={2}>Facil</option>
+          <option value={3}>Media</option>
+          <option value={4}>Dificil</option>
+          <option value={5}>Muy dificil</option>
+        </select>
+      </label>
 
-      <button type="submit">{buttonText}</button>
-      <button type="button" onClick={onCancel}>
-        Cancelar
-      </button>
+      <div className="form-actions">
+        <button type="submit">{buttonText}</button>
+        <button type="button" onClick={onCancel}>
+          Cancelar
+        </button>
+      </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="form-error">{error}</p>}
     </form>
   );
 }

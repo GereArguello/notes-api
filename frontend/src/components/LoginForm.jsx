@@ -32,10 +32,10 @@ function LoginForm({ onSwitch, onLogin }) {
   };
 
   return (
-    <div className="login-container">
+    <div className="auth-container">
       <h1>Iniciar sesión</h1>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="auth-form">
         <div>
           <input
             type="email"
@@ -59,12 +59,12 @@ function LoginForm({ onSwitch, onLogin }) {
         <button type="submit">Ingresar</button>
       </form>
 
-      <p>
+      <p className="auth-switch">
         ¿No tenés cuenta?{" "}
         <button onClick={onSwitch}>Crear una</button>
       </p>
 
-      {message && <p>{message}</p>}
+      {message && <p className="auth-message">{message}</p>}
     </div>
   );
 }

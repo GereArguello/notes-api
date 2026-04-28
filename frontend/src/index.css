@@ -86,7 +86,7 @@ h2 {
 }
 
 /* Global input and button styles */
-input, button {
+input, button, select, textarea {
   font-family: var(--sans);
   font-size: 1rem;
   padding: 0.5rem 0.75rem;
@@ -97,7 +97,7 @@ input, button {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-input:focus, button:focus {
+input:focus, button:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-bg);
@@ -133,10 +133,283 @@ form div {
   gap: 0.5rem;
 }
 
-.login-container {
-  padding: var(--padding);
+.form-page {
+  padding: clamp(2rem, 5vw, 4rem) var(--padding);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.section-header {
+  width: min(100%, 42rem);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.section-header--left {
+  text-align: left;
+}
+
+.section-header-eyebrow {
+  margin-bottom: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.section-header-title {
+  margin: 0;
+  color: var(--accent);
+  font-size: clamp(1.55rem, 3vw, 2.15rem);
+  line-height: 1.08;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.section-header-subtitle {
+  margin-top: 0.55rem;
+  margin-bottom: 1.4rem;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+select,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--accent) 50%),
+    linear-gradient(135deg, var(--accent) 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.15rem) calc(50% - 0.15rem),
+    calc(100% - 0.8rem) calc(50% - 0.15rem);
+  background-size: 0.4rem 0.4rem, 0.4rem 0.4rem;
+  background-repeat: no-repeat;
+  padding-right: 2.5rem;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 8rem;
+}
+
+.entity-form {
+  width: min(100%, 34rem);
+  gap: 1.15rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 250, 243, 0.96) 0%, rgba(244, 239, 230, 0.92) 100%);
+  box-shadow: var(--shadow);
+  box-sizing: border-box;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  text-align: left;
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.field-group span {
+  font-size: 0.95rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.form-error {
+  color: #b42318;
+  font-weight: 600;
+}
+
+.auth-container {
+  padding: clamp(2rem, 5vw, 4rem) var(--padding);
   font-weight: 500;
   color: var(--text-h);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-form {
+  width: min(100%, 34rem);
+  margin-bottom: 1.75rem;
+  margin-top: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 250, 243, 0.96) 0%, rgba(244, 239, 230, 0.92) 100%);
+  box-shadow: var(--shadow);
+  box-sizing: border-box;
+}
+
+.auth-form button[type="submit"] {
+  margin-top: 0.5rem;
+}
+
+.auth-switch {
+  margin-top: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  color: var(--text);
+}
+
+.auth-switch button {
+  padding-inline: 0.9rem;
+}
+
+.auth-message {
+  margin-top: 1rem;
+  color: var(--text);
+}
+
+.page-detail-shell {
+  width: min(100%, 58rem);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem) var(--padding) clamp(3rem, 6vw, 4rem);
+  box-sizing: border-box;
+}
+
+.note-sheet {
+  position: relative;
+  text-align: left;
+  padding: clamp(1.5rem, 4vw, 3rem);
+  
+  padding-left: clamp(2.0rem, 6vw, 4rem);
+  border: 1px solid rgba(212, 196, 168, 0.9);
+  border-radius: 24px;
+  background:
+    linear-gradient(to right, transparent 0, transparent 4.3rem, rgba(196, 111, 111, 0.24) 4.3rem, rgba(196, 111, 111, 0.24) 4.45rem, transparent 4.45rem),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 252, 246, 0.98) 0,
+      rgba(255, 252, 246, 0.98) 2.35rem,
+      rgba(170, 127, 90, 0.16) 2.35rem,
+      rgba(170, 127, 90, 0.16) calc(2.35rem + 1px)
+    );
+  box-shadow: 0 20px 45px rgba(160, 120, 100, 0.18);
+  overflow: hidden;
+  
+}
+
+.note-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 12rem);
+  pointer-events: none;
+}
+
+.note-sheet-header,
+.note-sheet-body,
+.note-sheet-actions {
+  position: relative;
+  z-index: 1;
+  padding-left: clamp(1rem, 3vw, 2rem);
+}
+
+.note-sheet-header {
+  top: 2px;
+}
+
+.note-sheet-body {
+  top: 15px;
+}
+
+.note-sheet-label {
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+
+.note-sheet-header h1 {
+  margin: 0 0 1.5rem;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  line-height: 1.16;
+}
+
+.note-sheet-body {
+  font-size: 0.95rem;
+  min-height: 20rem;
+}
+
+.note-line {
+  min-height: 2.32rem;
+  line-height: 2.32rem;
+  color: var(--text-h);
+  padding-right: 0.25rem;
+  padding-top: 0.08rem;
+}
+
+.note-sheet-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: calc(1.75rem + 4px);
+}
+
+@media (max-width: 768px) {
+  .note-sheet {
+    padding: 1.25rem 1rem 1.5rem;
+    border-radius: 18px;
+    background:
+      linear-gradient(to right, transparent 0, transparent 2.8rem, rgba(196, 111, 111, 0.24) 2.8rem, rgba(196, 111, 111, 0.24) 2.95rem, transparent 2.95rem),
+      repeating-linear-gradient(
+        to bottom,
+        rgba(255, 252, 246, 0.98) 0,
+        rgba(255, 252, 246, 0.98) 2.1rem,
+        rgba(170, 127, 90, 0.16) 2.1rem,
+        rgba(170, 127, 90, 0.16) calc(2.1rem + 1px)
+      );
+  }
+
+  .note-sheet-header,
+  .note-sheet-body,
+  .note-sheet-actions {
+    padding-left: 0.85rem;
+  }
+
+  .note-sheet-body p {
+    min-height: 14rem;
+  }
+
+  .note-sheet-body {
+    font-size: 0.94rem;
+    min-height: 14rem;
+  }
+
+  .note-line {
+    min-height: 2.06rem;
+    line-height: 2.06rem;
+    padding-top: 0.06rem;
+  }
+
+  .note-sheet-actions {
+    justify-content: center;
+  }
 }
 
 h1 {

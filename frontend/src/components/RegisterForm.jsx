@@ -38,10 +38,10 @@ function RegisterForm({ onSwitch }) {
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div className="auth-container">
       <h1>Crear usuario</h1>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="auth-form">
         <div>
           <input
             type="text"
@@ -95,12 +95,12 @@ function RegisterForm({ onSwitch }) {
         <button type="submit">Crear usuario</button>
       </form>
 
-      <p>
+      <p className="auth-switch">
         ¿Ya tenés cuenta?{" "}
         <button onClick={onSwitch}>Iniciar sesión</button>
       </p>
 
-      {message && <p>{message}</p>}
+      {message && <p className="auth-message">{message}</p>}
     </div>
   );
 }

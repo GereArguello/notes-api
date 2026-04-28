@@ -35,29 +35,42 @@ function PageDetailPage() {
   if (loading) return <p>Cargando...</p>;
 
   return (
-    <div>
-      <h1>{page.title}</h1>
+    <div className="page-detail-shell">
+      <article className="note-sheet">
+        <header className="note-sheet-header">
+          <p className="note-sheet-label">Apunte</p>
+          <h1>{page.title}</h1>
+        </header>
 
-      <p>{page.content || "Sin contenido"}</p>
+        <div className="note-sheet-body">
+          {(page.content || "Sin contenido").split("\n").map((line, index) => (
+            <p key={`${page.id}-line-${index}`} className="note-line">
+              {line || "\u00A0"}
+            </p>
+          ))}
+        </div>
 
-      <button
-        onClick={() =>
-          navigate(`/subjects/${subject_id}/topics/${topic_id}`)
-        }
-      >
-        Volver
-      </button>
+        <footer className="note-sheet-actions">
+          <button
+            onClick={() =>
+              navigate(`/subjects/${subject_id}/topics/${topic_id}`)
+            }
+          >
+            Volver
+          </button>
 
-      <button
-        onClick={() =>
-          navigate(
-            `/subjects/${subject_id}/topics/${topic_id}/pages/${page.id}/edit`,
-            { state: { from: location.pathname } }
-          )
-        }
-      >
-        Editar
-      </button>
+          <button
+            onClick={() =>
+              navigate(
+                `/subjects/${subject_id}/topics/${topic_id}/pages/${page.id}/edit`,
+                { state: { from: location.pathname } }
+              )
+            }
+          >
+            Editar
+          </button>
+        </footer>
+      </article>
     </div>
   );
 }

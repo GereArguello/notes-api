@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import ListItem from "../../components/ListItem";
+import SectionHeader from "../../components/SectionHeader";
 import "./SubjectsPage.css";
 
 function SubjectsPage() {
@@ -41,7 +42,10 @@ function SubjectsPage() {
 
   return (
     <div className="page-container">
-      <h1 className="subjects-title">Mis materias</h1>
+      <SectionHeader
+        title="Mis materias"
+        subtitle="Organizá tus cursadas, accesos recientes y nuevos apuntes."
+      />
       <div className="card-container">
         <button onClick={() => navigate("/subjects/new")}>
           Crear materia

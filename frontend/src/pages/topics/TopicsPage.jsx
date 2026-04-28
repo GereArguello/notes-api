@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import ListItem from "../../components/ListItem";
+import SectionHeader from "../../components/SectionHeader";
 
 function TopicsPage() {
   const { subject_id } = useParams();
@@ -63,7 +64,10 @@ function TopicsPage() {
 
   return (
     <div className="page-container">
-      <h1>Temas</h1>
+      <SectionHeader
+        title="Temas"
+        subtitle="Entrá a cada bloque para seguir construyendo tus apuntes."
+      />
       <div className="list-container">
         <button onClick={() => navigate(`/subjects/${subject_id}/topics/new`)}>
           Crear tema
