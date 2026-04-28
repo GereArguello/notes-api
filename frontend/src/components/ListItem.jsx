@@ -1,3 +1,4 @@
+import React, { useState, useRef } from 'react';
 import "./ListItem.css";
 
 function ListItem({
@@ -10,7 +11,18 @@ function ListItem({
   onDelete,
   variant = "list",
 }) {
-  const desc = description || "Sin descripción";
+  const desc = description;
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const timeoutRef = useRef(null);
+
+  const handleMouseEnter = () => {
+    timeoutRef.current = setTimeout(() => setTooltipVisible(true), 1000);
+  };
+
+  const handleMouseLeave = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setTooltipVisible(false);
+  };
 
   //  LIST (filas)
   if (variant === "list") {
@@ -66,7 +78,6 @@ function ListItem({
   //  GRID (materias) 
   return (
     <li className="list-item list-item-grid" onClick={onClick}>
-      
       <div className="list-item-content">
         <div className="list-item-title">
           <strong>{title}</strong>
@@ -79,11 +90,7 @@ function ListItem({
         )}
 
         <div className="list-item-description-wrapper">
-          <div className="list-item-description">
-            {desc}
-          </div>
-
-          <div className="list-item-tooltip">
+          <div className={`list-item-description ${tooltipVisible ? 'show-tooltip' : ''}`} data-title={desc} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
             {desc}
           </div>
         </div>

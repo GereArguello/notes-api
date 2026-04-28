@@ -1,24 +1,26 @@
 /* 🔹 BASE (para todos) */
 .list-item {
-  border-radius: 10px;
+  border-radius: var(--border-radius);
   padding: 1rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow);
+  overflow: hidden;
 }
-
 
 /* 🔲 SUBJECTS (cards) */
 .list-item-grid {
-  background-color: #fffaf3;
-  border: 1px solid #e0d6c3;
+  background: linear-gradient(135deg, #fffaf3 0%, #f4efe6 100%);
+  border: 1px solid var(--border);
+  border-left: 4px solid #d4c4a8;
 
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 
-  aspect-ratio: 1 / 1; /* 🔥 solo acá */
+  aspect-ratio: 1 / 1.2; /* Menos alto */
+  overflow: visible; /* Para tooltips */
 }
-
 
 /* 📄 LISTA (topics/pages) */
 .list-item-list {
@@ -30,7 +32,7 @@
   min-height: 56px;
   padding: 0.2rem 1rem;
 
-  border-bottom: 1px solid #e0d6c3;
+  border-bottom: 1px solid var(--border);
   border-radius: 0;
   background-color: transparent;
 }
@@ -51,6 +53,15 @@
 .list-item-list .list-item-title {
   font-size: 1.05rem;
   text-align: left;
+}
+
+/* Título en grid */
+.list-item-grid .list-item-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Solo descripción en modo lista */
@@ -81,11 +92,12 @@
 }
 
 .list-item-list:hover {
-  background-color: #fffaf3;
+  background: linear-gradient(135deg, #fffaf3 0%, #f4efe6 100%);
 }
 
 .list-item-grid:hover {
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-hover);
+  transform: scale(1.02) translateY(-4px);
 }
 
 .list-item:hover {
@@ -100,8 +112,37 @@
   flex: 1; /* 🔥 CLAVE */
 }
 
-.list-item-title {
-  font-size: 1.1rem;
+/* Tooltip */
+.list-item-description-wrapper {
+  position: relative;
+}
+
+.list-item-description::after {
+  content: attr(data-title);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #2d3748, #1a202c);
+  color: #e2e8f0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  white-space: normal;
+  width: 400px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 10;
+  pointer-events: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  border: 1px solid #4a5568;
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.list-item-description.show-tooltip::after {
+  opacity: 1;
 }
 
 .list-item-subtitle {

@@ -2,20 +2,24 @@
   --text: #6b6375;
   --text-h: #08060d;
   --bg: #fff;
-  --border: #e5e4e7;
+  --border: #e0d6c3;
   --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
+  --accent: #aa7f5a; /* Changed to brown */
+  --accent-bg: rgba(170, 127, 90, 0.1);
+  --accent-border: rgba(170, 127, 90, 0.5);
   --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  --shadow: rgba(160, 120, 100, 0.15) 0 8px 20px; /* Deeper brown shadow */
+  --shadow-hover: rgba(160, 120, 100, 0.25) 0 12px 30px;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Crimson Text', serif; /* Serif for book feel */
+  --heading: 'Crimson Text', serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  --border-radius: 16px; /* More modern */
+  --gap: 2rem;
+  --padding: 2rem;
+
+  font: 18px/160% var(--sans); /* Better line height */
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);
@@ -27,6 +31,11 @@
 
   @media (max-width: 1024px) {
     font-size: 16px;
+  }
+
+  @media (max-width: 768px) {
+    --gap: 1rem;
+    --padding: 1rem;
   }
 }
 
@@ -52,6 +61,8 @@
 
 body {
   margin: 0;
+  background-color: #f4efe6; /* Paper background */
+  background-image: radial-gradient(circle at 50% 50%, rgba(255, 250, 243, 0.1) 0%, transparent 50%); /* Subtle texture */
 }
 
 #root {
@@ -69,6 +80,62 @@ body {
 h1,
 h2 {
   font-family: var(--heading);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text-h);
+}
+
+/* Global input and button styles */
+input, button {
+  font-family: var(--sans);
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input:focus, button:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+button {
+  background: linear-gradient(135deg, #fffaf3 0%, #f4efe6 100%);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* Form styles */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+form div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.login-container {
+  padding: var(--padding);
+}
   font-weight: 500;
   color: var(--text-h);
 }

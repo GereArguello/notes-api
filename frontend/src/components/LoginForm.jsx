@@ -32,7 +32,7 @@ function LoginForm({ onSwitch, onLogin }) {
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div className="login-container">
       <h1>Iniciar sesión</h1>
 
       <form onSubmit={handleSubmit}>
