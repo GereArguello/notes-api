@@ -12,5 +12,5 @@ class TopicPagination(Params):
 
 class PagePagination(Params):
     page: int = 1
-    size: int = 30
-    max_size: int = 60
+    size: int = 20
+    max_size: int = 30

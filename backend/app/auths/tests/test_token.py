@@ -2,6 +2,7 @@ from fastapi import status
 from datetime import timedelta
 from app.core.security import create_access_token, create_refresh_token
 import time
+from app.core.config import settings
 
 #----- TESTS PARA TOKEN DE ACCESO -----#
 def test_should_fail_if_token_is_missing(client):
@@ -89,12 +90,17 @@ def test_refresh_fails_if_token_is_invalid(client, user_login):
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 def test_refresh_token_cannot_be_reused(client, user_login):
+    refresh_cookie = client.cookies.get("refresh_token")
+
     # primer uso
     response1 = client.post("/auth/refresh")
     assert response1.status_code == status.HTTP_200_OK
 
     # esperar a que pase el grace period
     time.sleep(3)
+
+    #Volver a setear cookie vieja
+    client.cookies.set("refresh_token", refresh_cookie)
 
     # segundo uso → ahora sí debe fallar
     response2 = client.post("/auth/refresh")

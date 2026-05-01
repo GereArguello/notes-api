@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     COOKIE_SECURE: bool = True
     COOKIE_SAMESITE: str = "lax"
     REFRESH_TOKEN_GRACE_PERIOD: int = 2
+    TESTING: bool = False
 
     ENVIRONMENT: str = "development"
     DEBUG: bool = True

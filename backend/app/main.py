@@ -22,10 +22,6 @@ logging.basicConfig(level=logging.INFO)
 app = FastAPI()
 
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, lambda request, exc: JSONResponse(
-    status_code=429,
-    content={"detail": "Too many requests"}
-))
 
 
 app.add_middleware(
@@ -43,6 +39,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_exception_handler(RateLimitExceeded, lambda request, exc: JSONResponse(
+    status_code=429,
+    content={"detail": "Too many requests"}
+))
 
 app.add_middleware(SlowAPIMiddleware)
 

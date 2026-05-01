@@ -1,3 +1,5 @@
+import os
+os.environ["TESTING"] = "true"  # Para que settings.TESTING sea True durante las pruebas
 from fastapi import status
 import pytest
 from fastapi.testclient import TestClient
@@ -6,6 +8,7 @@ from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, Session
 from app.core.database import get_session
 from app.core.config import settings
+from app.core.limiter import limiter
 from app.core.enums import DifficultyLevel
 from app.main import app
 
@@ -33,6 +36,10 @@ def session_fixture():
 @pytest.fixture(autouse=True)
 def override_settings():
     settings.COOKIE_SECURE = False
+    limiter.enabled = False
+    limiter.reset()
+    yield
+    limiter.reset()
 
 @pytest.fixture(name="client")
 def client_fixture(session: Session):
