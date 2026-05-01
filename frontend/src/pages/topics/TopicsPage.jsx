@@ -1,31 +1,69 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import ListItem from "../../components/ListItem";
 import SectionHeader from "../../components/SectionHeader";
+import PaginationFooter from "../../components/PaginationFooter";
 
 function TopicsPage() {
   const { subject_id } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { token } = useAuth();
 
   const [topics, setTopics] = useState([]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 20,
+    total: 0,
+  });
   const [loading, setLoading] = useState(true);
 
+  const currentPage = Math.max(1, Number(searchParams.get("page")) || 1);
+  const totalPages = Math.max(1, Math.ceil(pagination.total / pagination.size));
+  const hasPreviousPage = currentPage > 1;
+  const hasNextPage = currentPage < totalPages;
+
+  const goToPage = (page) => {
+    const nextPage = Math.max(1, page);
+    const nextParams = new URLSearchParams(searchParams);
+
+    if (nextPage === 1) {
+      nextParams.delete("page");
+    } else {
+      nextParams.set("page", String(nextPage));
+    }
+
+    setSearchParams(nextParams);
+  };
+
   useEffect(() => {
-    const fetchTopic = async () => {
+    const fetchTopics = async () => {
+      setLoading(true);
+
       try {
-        //  esto actualiza last_viewed_at
         await fetchWithAuth(`/subjects/${subject_id}`, token);
 
-        //  esto trae los topics
         const data = await fetchWithAuth(
-          `/subjects/${subject_id}/topics`,
+          `/subjects/${subject_id}/topics?page=${currentPage}`,
           token
         );
 
-        setTopics(data.items);
+        const size = data.size || 20;
+        const total = data.total || 0;
+        const fetchedTotalPages = Math.max(1, Math.ceil(total / size));
+
+        setTopics(data.items || []);
+        setPagination({
+          page: data.page || currentPage,
+          size,
+          total,
+        });
+
+        if (currentPage > fetchedTotalPages) {
+          goToPage(fetchedTotalPages);
+        }
       } catch (err) {
         console.error(err);
         alert("Error al cargar temas");
@@ -34,26 +72,40 @@ function TopicsPage() {
       }
     };
 
-    fetchTopic();
-  }, [subject_id, token]);
+    fetchTopics();
+  }, [subject_id, token, currentPage]);
 
-  // 🔹 eliminar topic
-  const deleteTopic = async (topic_id) => {
-    const confirmDelete = window.confirm("¿Seguro que querés eliminar este tema?");
+  const deleteTopic = async (topicId) => {
+    const confirmDelete = window.confirm("Seguro que queres eliminar este tema?");
     if (!confirmDelete) return;
 
     try {
-      await fetchWithAuth(
-        `/subjects/${subject_id}/topics/${topic_id}`,
-        token,
-        {
-          method: "DELETE",
-        }
+      await fetchWithAuth(`/subjects/${subject_id}/topics/${topicId}`, token, {
+        method: "DELETE",
+      });
+
+      const remainingItems = topics.length - 1;
+      const previousTotalPages = Math.max(
+        1,
+        Math.ceil((pagination.total - 1) / pagination.size)
       );
 
-      // ✅ mantener tu optimización (sin refetch)
-      setTopics((prev) => prev.filter((t) => t.id !== topic_id));
+      if (remainingItems === 0 && currentPage > 1 && currentPage > previousTotalPages) {
+        goToPage(currentPage - 1);
+        return;
+      }
 
+      const data = await fetchWithAuth(
+        `/subjects/${subject_id}/topics?page=${currentPage}`,
+        token
+      );
+
+      setTopics(data.items || []);
+      setPagination({
+        page: data.page || currentPage,
+        size: data.size || pagination.size,
+        total: data.total || 0,
+      });
     } catch (err) {
       console.error(err);
       alert("Error al eliminar el tema");
@@ -66,38 +118,40 @@ function TopicsPage() {
     <div className="page-container">
       <SectionHeader
         title="Temas"
-        subtitle="Entrá a cada bloque para seguir construyendo tus apuntes."
+        subtitle="Entra a cada bloque para seguir construyendo tus apuntes."
       />
       <div className="list-container">
-        <button onClick={() => navigate(`/subjects/${subject_id}/topics/new`)}>
+        <button type="button" onClick={() => navigate(`/subjects/${subject_id}/topics/new`)}>
           Crear tema
         </button>
 
         <ul>
-          {topics.map((t) => (
+          {topics.map((topic) => (
             <ListItem
-              key={t.id}
-              title={t.name}
+              key={topic.id}
+              title={topic.name}
               secondaryText={`${
-                t.last_viewed_at
-                  ? new Date(t.last_viewed_at).toLocaleString("es-AR")
+                topic.last_viewed_at
+                  ? new Date(topic.last_viewed_at).toLocaleString("es-AR")
                   : "Nunca"
               }`}
               variant="list"
-              onClick={() =>
-                navigate(`/subjects/${subject_id}/topics/${t.id}`)
-              }
-              onEdit={() =>
-                navigate(`/subjects/${subject_id}/topics/${t.id}/edit`)
-              }
-              onDelete={() => deleteTopic(t.id)}
+              onClick={() => navigate(`/subjects/${subject_id}/topics/${topic.id}`)}
+              onEdit={() => navigate(`/subjects/${subject_id}/topics/${topic.id}/edit`)}
+              onDelete={() => deleteTopic(topic.id)}
             />
           ))}
         </ul>
 
-        <button onClick={() => navigate(`/subjects`)}>
-          Volver atrás
-        </button>
+        <PaginationFooter
+          currentPage={currentPage}
+          hasPreviousPage={hasPreviousPage}
+          hasNextPage={hasNextPage}
+          onPreviousPage={() => goToPage(currentPage - 1)}
+          onNextPage={() => goToPage(currentPage + 1)}
+          onBack={() => navigate("/subjects")}
+          backLabel="Volver atras"
+        />
       </div>
     </div>
   );

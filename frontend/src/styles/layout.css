@@ -25,3 +25,43 @@
   box-shadow: var(--shadow-hover);
   transform: translateY(-4px);
 }
+
+.pagination-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pagination-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.pagination-arrow,
+.pagination-arrow-placeholder {
+  width: 2.75rem;
+  min-width: 2.75rem;
+  height: 2.5rem;
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.pagination-arrow {
+  font-size: 1.3rem;
+
+}
+
+.pagination-arrow-placeholder {
+  visibility: hidden;
+}
+
+.pagination-page-indicator {
+  color: var(--text);
+  font-size: 1rem;
+}
