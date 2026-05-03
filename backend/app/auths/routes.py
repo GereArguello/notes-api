@@ -51,9 +51,11 @@ Autentica un usuario utilizando email y contraseña.
 @limiter.limit("5/minute")
 def login(request: Request, response: Response, session: SessionDep, form_data: OAuth2PasswordRequestForm = Depends()):
     
+    email = form_data.username.strip().lower()
+
     user = authenticate_user(
         session=session,
-        email=form_data.username,
+        email=email,
         password=form_data.password
     )
 

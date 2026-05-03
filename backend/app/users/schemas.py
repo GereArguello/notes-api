@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, Field
-from pydantic import EmailStr
+from pydantic import EmailStr, field_validator
 from typing import Optional
 from datetime import date, datetime
 
@@ -10,6 +10,11 @@ class UserCreate(SQLModel):
     password: str = Field(min_length=8, max_length=128)
     password2: str = Field(min_length=8, max_length=128)
     birth_date: Optional[date] = None
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, v):
+        return v.strip().lower()
 
 class UserRead(SQLModel):
     id: int
