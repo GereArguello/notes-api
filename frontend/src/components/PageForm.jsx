@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import PageSheet from "./PageSheet";
 
 function PageForm({ initialData, onSubmit, buttonText, onCancel }) {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [error, setError] = useState(null);
 
-  // 🔹 cargar datos si estamos editando
   useEffect(() => {
     if (initialData) {
       setTitle(initialData.title || "");
@@ -13,44 +13,39 @@ function PageForm({ initialData, onSubmit, buttonText, onCancel }) {
     }
   }, [initialData]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError(null);
 
-    onSubmit({
-      title,
-      content,
-    }).catch(() => {
+    try {
+      await onSubmit({
+        title,
+        content,
+      });
+    } catch {
       setError("Error al guardar");
-    });
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="entity-form">
-      <h2>{buttonText}</h2>
-
-      <input
-        type="text"
-        placeholder="Título"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
+    <form onSubmit={handleSubmit} className="page-detail-shell">
+      <PageSheet
+        title={title}
+        content={content}
+        isEditing
+        onTitleChange={setTitle}
+        onContentChange={setContent}
+        actions={
+          <>
+            <button type="button" onClick={onCancel}>
+              Cancelar
+            </button>
+            <button type="submit">{buttonText}</button>
+          </>
+        }
       />
 
-      <textarea
-        placeholder="Contenido"
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        rows={15}
-      />
-
-      <div className="form-actions">
-        <button type="submit">{buttonText}</button>
-        <button type="button" onClick={onCancel}>
-          Cancelar
-        </button>
-      </div>
-
-      {error && <p className="form-error">{error}</p>}
+      {error ? <p className="form-error page-form-error">{error}</p> : null}
     </form>
   );
 }

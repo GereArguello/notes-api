@@ -4,6 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import { getErrorMessage } from "../../utils/errorMessage";
 import { showAlertOnce } from "../../utils/showAlertOnce";
+import PageSheet from "../../components/PageSheet";
 
 function PageDetailPage() {
   const { subject_id, topic_id, page_id } = useParams();
@@ -38,41 +39,32 @@ function PageDetailPage() {
 
   return (
     <div className="page-detail-shell">
-      <article className="note-sheet">
-        <header className="note-sheet-header">
-          <p className="note-sheet-label">Apunte</p>
-          <h1>{page.title}</h1>
-        </header>
+      <PageSheet
+        title={page.title}
+        content={page.content}
+        actions={
+          <>
+            <button
+              onClick={() =>
+                navigate(`/subjects/${subject_id}/topics/${topic_id}`)
+              }
+            >
+              Volver
+            </button>
 
-        <div className="note-sheet-body">
-          {(page.content || "Sin contenido").split("\n").map((line, index) => (
-            <p key={`${page.id}-line-${index}`} className="note-line">
-              {line || "\u00A0"}
-            </p>
-          ))}
-        </div>
-
-        <footer className="note-sheet-actions">
-          <button
-            onClick={() =>
-              navigate(`/subjects/${subject_id}/topics/${topic_id}`)
-            }
-          >
-            Volver
-          </button>
-
-          <button
-            onClick={() =>
-              navigate(
-                `/subjects/${subject_id}/topics/${topic_id}/pages/${page.id}/edit`,
-                { state: { from: location.pathname } }
-              )
-            }
-          >
-            Editar
-          </button>
-        </footer>
-      </article>
+            <button
+              onClick={() =>
+                navigate(
+                  `/subjects/${subject_id}/topics/${topic_id}/pages/${page.id}/edit`,
+                  { state: { from: location.pathname } }
+                )
+              }
+            >
+              Editar
+            </button>
+          </>
+        }
+      />
     </div>
   );
 }
