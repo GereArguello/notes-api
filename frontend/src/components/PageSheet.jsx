@@ -6,6 +6,10 @@ function PageSheet({
   onContentChange,
   actions,
 }) {
+  const bodyClassName = isEditing
+    ? "note-sheet-body note-sheet-body--editing"
+    : "note-sheet-body note-sheet-body--reading";
+
   return (
     <article className="note-sheet">
       <header className="note-sheet-header">
@@ -24,7 +28,7 @@ function PageSheet({
         )}
       </header>
 
-      <div className="note-sheet-body">
+      <div className={bodyClassName}>
         {isEditing ? (
           <textarea
             className="note-content-input"

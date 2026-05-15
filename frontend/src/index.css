@@ -280,25 +280,29 @@ form.page-detail-shell {
 }
 
 .note-sheet {
+  --sheet-rule-gap: 2.35rem;
+  --sheet-rule-offset: 0.18rem;
+  --sheet-rule-color: rgba(170, 127, 90, 0.22);
+  --sheet-text-offset: 0.18rem;
+  --sheet-body-inset: clamp(1rem, 3vw, 2rem);
   position: relative;
   text-align: left;
   padding: clamp(1.5rem, 4vw, 3rem);
-  
   padding-left: clamp(2.0rem, 6vw, 4rem);
   border: 1px solid rgba(212, 196, 168, 0.9);
   border-radius: 24px;
-  background:
-    linear-gradient(to right, transparent 0, transparent 4.3rem, rgba(196, 111, 111, 0.24) 4.3rem, rgba(196, 111, 111, 0.24) 4.45rem, transparent 4.45rem),
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255, 252, 246, 0.98) 0,
-      rgba(255, 252, 246, 0.98) 2.35rem,
-      rgba(170, 127, 90, 0.16) 2.35rem,
-      rgba(170, 127, 90, 0.16) calc(2.35rem + 1px)
-    );
+  background-color: rgba(255, 252, 246, 0.98);
+  background-image: linear-gradient(
+    to right,
+    transparent 0,
+    transparent 4.3rem,
+    rgba(196, 111, 111, 0.24) 4.3rem,
+    rgba(196, 111, 111, 0.24) 4.45rem,
+    transparent 4.45rem
+  );
+  background-repeat: no-repeat;
   box-shadow: 0 20px 45px rgba(160, 120, 100, 0.18);
   overflow: hidden;
-  
 }
 
 .note-sheet::before {
@@ -314,19 +318,11 @@ form.page-detail-shell {
 .note-sheet-actions {
   position: relative;
   z-index: 1;
-  padding-left: clamp(1rem, 3vw, 2rem);
-}
-
-.note-sheet-header {
-  top: 2px;
-}
-
-.note-sheet-body {
-  top: 15px;
+  padding-left: var(--sheet-body-inset);
 }
 
 .note-sheet-label {
-  margin-bottom: 0.5rem;
+  margin: 0 0 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.18em;
   font-size: 0.8rem;
@@ -355,16 +351,30 @@ form.page-detail-shell {
 }
 
 .note-content-input {
-  width: 100%;
+  display: block;
+  width: calc(100% + var(--sheet-body-inset));
   min-height: 20rem;
-  padding: 0.08rem 0.25rem 0 0;
+  max-height: calc(var(--sheet-rule-gap) * 15 + var(--sheet-text-offset));
+  margin-left: calc(var(--sheet-body-inset) * -1);
+  padding: var(--sheet-text-offset) 0.25rem 0 var(--sheet-body-inset);
   border: none;
   border-radius: 0;
-  background: transparent;
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--sheet-rule-gap) - 1px),
+    var(--sheet-rule-color) calc(var(--sheet-rule-gap) - 1px),
+    var(--sheet-rule-color) var(--sheet-rule-gap)
+  );
+  background-position: 0 var(--sheet-rule-offset);
+  background-repeat: repeat;
+  background-attachment: local;
+  background-origin: content-box;
   color: var(--text-h);
   font: inherit;
   font-size: 0.95rem;
-  line-height: 2.32rem;
+  line-height: var(--sheet-rule-gap);
   resize: none;
   box-shadow: none;
   scrollbar-width: thin;
@@ -405,14 +415,59 @@ form.page-detail-shell {
 .note-sheet-body {
   font-size: 0.95rem;
   min-height: 20rem;
+  padding-top: var(--sheet-text-offset);
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(170, 127, 90, 0.22);
+}
+
+.note-sheet-body--reading {
+  max-height: calc(var(--sheet-rule-gap) * 15 + var(--sheet-text-offset));
+  overflow-y: auto;
+  background-color: transparent;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--sheet-rule-gap) - 1px),
+    var(--sheet-rule-color) calc(var(--sheet-rule-gap) - 1px),
+    var(--sheet-rule-color) var(--sheet-rule-gap)
+  );
+  background-position: 0 var(--sheet-rule-offset);
+  background-repeat: repeat;
+  background-attachment: local;
+  background-origin: content-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(170, 127, 90, 0.78) rgba(255, 250, 243, 0.92);
+}
+
+.note-sheet-body--editing {
+  padding-bottom: 0;
 }
 
 .note-line {
-  min-height: 2.32rem;
-  line-height: 2.32rem;
+  margin: 0;
+  line-height: var(--sheet-rule-gap);
   color: var(--text-h);
   padding-right: 0.25rem;
-  padding-top: 0.08rem;
+}
+
+.note-sheet-body--reading::-webkit-scrollbar {
+  width: 0.8rem;
+}
+
+.note-sheet-body--reading::-webkit-scrollbar-track {
+  background: rgba(255, 250, 243, 0.92);
+  border-left: 1px solid rgba(170, 127, 90, 0.18);
+  border-radius: 999px;
+}
+
+.note-sheet-body--reading::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(170, 127, 90, 0.92) 0%, rgba(140, 103, 73, 0.92) 100%);
+  border: 2px solid rgba(255, 250, 243, 0.92);
+  border-radius: 999px;
+}
+
+.note-sheet-body--reading::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(140, 103, 73, 0.96) 0%, rgba(107, 78, 57, 0.96) 100%);
 }
 
 .note-sheet-actions {
@@ -420,32 +475,31 @@ form.page-detail-shell {
   justify-content: flex-end;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin-top: calc(1.75rem + 4px);
+  margin-top: 1rem;
 }
 
 @media (max-width: 768px) {
   .note-sheet {
+    --sheet-rule-gap: 2.1rem;
+    --sheet-rule-offset: 0.16rem;
+    --sheet-text-offset: 0.16rem;
+    --sheet-body-inset: 0.85rem;
     padding: 1.25rem 1rem 1.5rem;
     border-radius: 18px;
-    background:
-      linear-gradient(to right, transparent 0, transparent 2.8rem, rgba(196, 111, 111, 0.24) 2.8rem, rgba(196, 111, 111, 0.24) 2.95rem, transparent 2.95rem),
-      repeating-linear-gradient(
-        to bottom,
-        rgba(255, 252, 246, 0.98) 0,
-        rgba(255, 252, 246, 0.98) 2.1rem,
-        rgba(170, 127, 90, 0.16) 2.1rem,
-        rgba(170, 127, 90, 0.16) calc(2.1rem + 1px)
-      );
+    background-image: linear-gradient(
+      to right,
+      transparent 0,
+      transparent 2.8rem,
+      rgba(196, 111, 111, 0.24) 2.8rem,
+      rgba(196, 111, 111, 0.24) 2.95rem,
+      transparent 2.95rem
+    );
   }
 
   .note-sheet-header,
   .note-sheet-body,
   .note-sheet-actions {
-    padding-left: 0.85rem;
-  }
-
-  .note-sheet-body p {
-    min-height: 14rem;
+    padding-left: var(--sheet-body-inset);
   }
 
   .note-sheet-body {
@@ -455,14 +509,12 @@ form.page-detail-shell {
 
   .note-content-input {
     min-height: 14rem;
+    max-height: calc(var(--sheet-rule-gap) * 15 + var(--sheet-text-offset));
     font-size: 0.94rem;
-    line-height: 2.06rem;
   }
 
-  .note-line {
-    min-height: 2.06rem;
-    line-height: 2.06rem;
-    padding-top: 0.06rem;
+  .note-sheet-body--reading {
+    max-height: calc(var(--sheet-rule-gap) * 15 + var(--sheet-text-offset));
   }
 
   .note-sheet-actions {
