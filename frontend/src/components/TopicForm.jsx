@@ -1,25 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 function TopicForm({ initialData, onSubmit, buttonText, onCancel }) {
-  const [name, setName] = useState("");
+  const [name, setName] = useState(() => initialData?.name || "");
   const [error, setError] = useState(null);
 
-  // 🔹 cargar datos si estamos editando
-  useEffect(() => {
-    if (initialData) {
-      setName(initialData.name || "");
-    }
-  }, [initialData]);
-
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-        await onSubmit({ name });
+      await onSubmit({ name });
     } catch {
-        setError("Error al guardar");
+      setError("Error al guardar");
     }
-    };
+  };
 
   return (
     <form onSubmit={handleSubmit} className="entity-form">

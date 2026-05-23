@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../../components/LoginForm";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 
-function LoginPage({ onLogin }) {
+function LoginPage() {
   const navigate = useNavigate();
-  const {login} = useAuth();
+  const { login } = useAuth();
 
   const handleLoginSuccess = (token) => {
     login(token);

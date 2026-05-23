@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 export function usePaginatedResource({
   fetchDataFn,
   deleteFn,
   pageSize = 20,
-  deps = [],
 }) {
   const [items, setItems] = useState([]);
   const [pagination, setPagination] = useState({
@@ -22,20 +21,23 @@ export function usePaginatedResource({
   const hasPreviousPage = currentPage > 1;
   const hasNextPage = currentPage < totalPages;
 
-  const goToPage = (page) => {
-    const nextPage = Math.max(1, page);
-    const nextParams = new URLSearchParams(searchParams);
+  const goToPage = useCallback(
+    (page) => {
+      const nextPage = Math.max(1, page);
+      const nextParams = new URLSearchParams(searchParams);
 
-    if (nextPage === 1) {
-      nextParams.delete("page");
-    } else {
-      nextParams.set("page", String(nextPage));
-    }
+      if (nextPage === 1) {
+        nextParams.delete("page");
+      } else {
+        nextParams.set("page", String(nextPage));
+      }
 
-    setSearchParams(nextParams);
-  };
+      setSearchParams(nextParams);
+    },
+    [searchParams, setSearchParams]
+  );
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
       const data = await fetchDataFn(currentPage);
@@ -60,32 +62,43 @@ export function usePaginatedResource({
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, fetchDataFn, goToPage, pageSize]);
 
   useEffect(() => {
     fetchItems();
-  }, [currentPage, ...deps]);
+  }, [fetchItems]);
 
-  const handleDelete = async (id) => {
-    await deleteFn(id);
+  const handleDelete = useCallback(
+    async (id) => {
+      await deleteFn(id);
 
-    const remainingItems = items.length - 1;
-    const previousTotalPages = Math.max(
-      1,
-      Math.ceil((pagination.total - 1) / pagination.size)
-    );
+      const remainingItems = items.length - 1;
+      const previousTotalPages = Math.max(
+        1,
+        Math.ceil((pagination.total - 1) / pagination.size)
+      );
 
-    if (
-      remainingItems === 0 &&
-      currentPage > 1 &&
-      currentPage > previousTotalPages
-    ) {
-      goToPage(currentPage - 1);
-      return;
-    }
+      if (
+        remainingItems === 0 &&
+        currentPage > 1 &&
+        currentPage > previousTotalPages
+      ) {
+        goToPage(currentPage - 1);
+        return;
+      }
 
-    await fetchItems();
-  };
+      await fetchItems();
+    },
+    [
+      currentPage,
+      deleteFn,
+      fetchItems,
+      goToPage,
+      items.length,
+      pagination.size,
+      pagination.total,
+    ]
+  );
 
   return {
     items,
@@ -93,8 +106,10 @@ export function usePaginatedResource({
     currentPage,
     hasPreviousPage,
     hasNextPage,
+    totalItems: pagination.total,
     goToPage,
     handleDelete,
+    updateItems: setItems,
     refetch: fetchItems,
   };
 }

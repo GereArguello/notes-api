@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import TopicForm from "../../components/TopicForm";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import SectionHeader from "../../components/SectionHeader";
 
@@ -62,6 +62,7 @@ function EditTopicPage() {
       />
 
       <TopicForm
+        key={topic.id}
         initialData={topic}
         buttonText="Guardar cambios"
         onSubmit={handleUpdate}

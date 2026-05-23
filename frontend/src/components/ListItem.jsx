@@ -1,14 +1,46 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef, useState } from "react";
 import "./ListItem.css";
+
+function ActionButton({
+  ariaLabel,
+  className = "",
+  disabled = false,
+  onClick,
+  title,
+  children,
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={ariaLabel}
+      className={className}
+      disabled={disabled}
+      title={title}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+    >
+      {children}
+    </button>
+  );
+}
 
 function ListItem({
   title,
   subtitle,
   secondaryText,
+  orderText,
   description,
   onClick,
   onEdit,
   onDelete,
+  onMoveUp,
+  onMoveDown,
+  onMoveTo,
+  disableMoveUp = false,
+  disableMoveDown = false,
+  isReordering = false,
   variant = "list",
 }) {
   const desc = description;
@@ -24,58 +56,74 @@ function ListItem({
     setTooltipVisible(false);
   };
 
-  //  LIST (filas)
+  const renderOrderMeta = () => (
+    <div className="list-item-secondary">
+      {orderText && <div className="list-item-order">{orderText}</div>}
+      <div className="list-item-secondary-label">Ultima vez visto</div>
+      <div className="list-item-secondary-date">{secondaryText}</div>
+    </div>
+  );
+
+  const renderActions = () => (
+    <div className="list-item-actions">
+      {onEdit && <ActionButton onClick={onEdit}>Editar</ActionButton>}
+      {onMoveUp && (
+        <ActionButton
+          ariaLabel="Subir una posicion"
+          className="list-item-icon-button"
+          disabled={disableMoveUp}
+          onClick={onMoveUp}
+          title="Subir"
+        >
+          ↑
+        </ActionButton>
+      )}
+      {onMoveDown && (
+        <ActionButton
+          ariaLabel="Bajar una posicion"
+          className="list-item-icon-button"
+          disabled={disableMoveDown}
+          onClick={onMoveDown}
+          title="Bajar"
+        >
+          ↓
+        </ActionButton>
+      )}
+      {onMoveTo && (
+        <ActionButton
+          ariaLabel="Mover a otra posicion"
+          className="list-item-jump-button"
+          onClick={onMoveTo}
+          title="Mover a otra posicion"
+        >
+          Mover a...
+        </ActionButton>
+      )}
+      {onDelete && <ActionButton onClick={onDelete}>Eliminar</ActionButton>}
+    </div>
+  );
+
   if (variant === "list") {
     return (
-      <li className="list-item list-item-list" onClick={onClick}>
-        
-        {/* 🔹 columna 1 */}
+      <li
+        className={`list-item list-item-list ${
+          isReordering ? "list-item-reordering" : ""
+        }`}
+        onClick={onClick}
+      >
         <div className="list-item-main">
           <div className="list-item-title">
             <strong>{title}</strong>
           </div>
         </div>
 
-        {/* 🔹 columna 2 */}
-        <div className="list-item-secondary">
-          <div className="list-item-secondary-label">
-            Última vez visto
-          </div>
-          <div className="list-item-secondary-date">
-            {secondaryText}
-          </div>
-        </div>
+        {renderOrderMeta()}
 
-        {/* 🔹 columna 3 */}
-        <div className="list-item-actions">
-          {onEdit && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit();
-              }}
-            >
-              Editar
-            </button>
-          )}
-
-          {onDelete && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-            >
-              Eliminar
-            </button>
-          )}
-        </div>
-
+        {renderActions()}
       </li>
     );
   }
 
-  //  GRID (materias) 
   return (
     <li className="list-item list-item-grid" onClick={onClick}>
       <div className="list-item-content">
@@ -83,52 +131,25 @@ function ListItem({
           <strong>{title}</strong>
         </div>
 
-        {subtitle && (
-          <div className="list-item-subtitle">
-            {subtitle}
-          </div>
-        )}
+        {subtitle && <div className="list-item-subtitle">{subtitle}</div>}
 
         <div className="list-item-description-wrapper">
-          <div className={`list-item-description ${tooltipVisible ? 'show-tooltip' : ''}`} data-title={desc} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+          <div
+            className={`list-item-description ${
+              tooltipVisible ? "show-tooltip" : ""
+            }`}
+            data-title={desc}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
             {desc}
           </div>
         </div>
 
-        <div className="list-item-secondary">
-          <div className="list-item-secondary-label">
-            Última vez visto
-          </div>
-          <div className="list-item-secondary-date">
-            {secondaryText}
-          </div>
-        </div>
+        {renderOrderMeta()}
       </div>
 
-      <div className="list-item-actions">
-        {onEdit && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-          >
-            Editar
-          </button>
-        )}
-
-        {onDelete && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-          >
-            Eliminar
-          </button>
-        )}
-      </div>
-
+      {renderActions()}
     </li>
   );
 }

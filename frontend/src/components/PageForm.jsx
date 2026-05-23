@@ -1,17 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import PageSheet from "./PageSheet";
 
 function PageForm({ initialData, onSubmit, buttonText, onCancel }) {
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [title, setTitle] = useState(() => initialData?.title || "");
+  const [content, setContent] = useState(() => initialData?.content || "");
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (initialData) {
-      setTitle(initialData.title || "");
-      setContent(initialData.content || "");
-    }
-  }, [initialData]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();

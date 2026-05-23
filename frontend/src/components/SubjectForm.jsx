@@ -1,18 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 function SubjectForm({ initialData, onSubmit, buttonText, onCancel }) {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [difficulty, setDifficulty] = useState(1);
+  const [name, setName] = useState(() => initialData?.name || "");
+  const [description, setDescription] = useState(
+    () => initialData?.description || ""
+  );
+  const [difficulty, setDifficulty] = useState(
+    () => initialData?.difficulty || 1
+  );
   const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (initialData) {
-      setName(initialData.name || "");
-      setDescription(initialData.description || "");
-      setDifficulty(initialData.difficulty || 1);
-    }
-  }, [initialData]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import PageForm from "../../components/PageForm";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import SectionHeader from "../../components/SectionHeader";
 import { getErrorMessage } from "../../utils/errorMessage";
@@ -72,6 +72,7 @@ function EditPagePage() {
       />
 
       <PageForm
+        key={page.id}
         initialData={page}
         buttonText="Guardar cambios"
         onSubmit={handleUpdate}

@@ -1,0 +1,80 @@
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(70, 52, 35, 0.28);
+  backdrop-filter: blur(8px);
+}
+
+.modal-card {
+  width: min(100%, 460px);
+  padding: 1.35rem;
+  border: 1px solid rgba(170, 127, 90, 0.28);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top, rgba(255, 250, 243, 0.98), rgba(244, 239, 230, 0.96));
+  box-shadow: 0 22px 60px rgba(83, 60, 39, 0.18);
+  text-align: left;
+}
+
+.reorder-modal-eyebrow {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8a6544;
+}
+
+.reorder-modal-title {
+  margin: 0.4rem 0 0;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.reorder-modal-copy {
+  margin: 0.55rem 0 1rem;
+  color: #6e6151;
+}
+
+.reorder-modal-field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.reorder-modal-field span {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #5f4b37;
+}
+
+.reorder-modal-field input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.reorder-modal-hint {
+  margin: 0.65rem 0 0;
+  font-size: 0.88rem;
+  color: #7a6f5a;
+}
+
+.reorder-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.2rem;
+}
+
+@media (max-width: 640px) {
+  .modal-card {
+    padding: 1.1rem;
+    border-radius: 18px;
+  }
+
+  .reorder-modal-actions {
+    flex-direction: column-reverse;
+  }
+}

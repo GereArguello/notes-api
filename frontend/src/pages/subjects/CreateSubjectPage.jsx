@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import SubjectForm from "../../components/SubjectForm";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import SectionHeader from "../../components/SectionHeader";
 

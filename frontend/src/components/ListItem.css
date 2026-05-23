@@ -3,7 +3,11 @@
   border-radius: var(--border-radius);
   padding: 1rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    background-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease,
+    opacity 0.22s ease;
   box-shadow: var(--shadow);
   overflow: hidden;
 }
@@ -25,7 +29,7 @@
 /* 📄 LISTA (topics/pages) */
 .list-item-list {
   display: grid;
-  grid-template-columns: 2fr 1fr auto;
+  grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr) auto;
   align-items: center;
   gap: 1rem;
 
@@ -76,6 +80,7 @@
   display: flex;
   flex-direction: column;
   justify-content: left;
+  align-items: flex-start;
 }
 
 /* Solo acciones en modo lista */
@@ -85,14 +90,20 @@
   padding-top: 0;
   margin-top: 0;
 
-  min-width: 160px;
+  min-width: 320px;
+  flex-wrap: wrap;
   display: flex;
   justify-content: flex-start;
-  gap: 1.2rem;
+  gap: 0.75rem;
 }
 
 .list-item-list:hover {
   background: linear-gradient(135deg, #fffaf3 0%, #f4efe6 100%);
+}
+
+.list-item-reordering {
+  background: linear-gradient(135deg, #fff7ea 0%, #f6efe3 100%);
+  box-shadow: 0 8px 18px rgba(170, 127, 90, 0.12);
 }
 
 .list-item-grid:hover {
@@ -206,6 +217,12 @@
   text-align: center;
 }
 
+.list-item-order {
+  font-size: 0.8rem;
+  color: #6b4f3a;
+  font-weight: 600;
+}
+
 /* etiqueta */
 .list-item-secondary-label {
   font-size: 0.8rem;
@@ -228,7 +245,7 @@
 }
 
 .list-item-actions button {
-  flex: 1;
+  flex: 0 1 auto;
   background: none;
   border: none;
   cursor: pointer;
@@ -237,4 +254,56 @@
 
 .list-item-actions button:hover {
   text-decoration: underline;
+}
+
+.list-item-icon-button {
+  min-width: 2rem;
+  padding: 0.15rem 0.35rem;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.list-item-icon-button:hover {
+  background-color: rgba(170, 127, 90, 0.12);
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.list-item-actions button:disabled {
+  cursor: not-allowed;
+  color: #b8ab98;
+  text-decoration: none;
+}
+
+.list-item-icon-button:disabled:hover {
+  background-color: transparent;
+  transform: none;
+}
+
+.list-item-jump-button {
+  padding-inline: 0.2rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .list-item-list {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+    padding: 0.85rem 1rem;
+  }
+
+  .list-item-list > * {
+    width: 100%;
+  }
+
+  .list-item-list .list-item-actions {
+    min-width: 0;
+    padding-top: 0.6rem;
+  }
 }

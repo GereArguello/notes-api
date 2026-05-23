@@ -1,5 +1,9 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { getStoredToken, logoutRequest, setStoredToken } from "../api/fetchWithAuth";
+import { createContext, useEffect, useState } from "react";
+import {
+  getStoredToken,
+  logoutRequest,
+  setStoredToken,
+} from "../api/fetchWithAuth";
 
 const AuthContext = createContext();
 const AUTH_TOKEN_EVENT = "auth-token-changed";
@@ -38,7 +42,4 @@ export function AuthProvider({ children }) {
   );
 }
 
-// hook personalizado 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export { AuthContext };

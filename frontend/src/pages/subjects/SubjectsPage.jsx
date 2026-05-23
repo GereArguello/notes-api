@@ -1,5 +1,6 @@
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import { usePaginatedResource } from "../../hooks/usePaginatedResource";
 
@@ -13,6 +14,19 @@ function SubjectsPage() {
   const navigate = useNavigate();
   const { token, logout } = useAuth();
 
+  const fetchSubjects = useCallback(
+    (page) => fetchWithAuth(`/subjects?page=${page}&size=9`, token),
+    [token]
+  );
+
+  const deleteSubject = useCallback(
+    (id) =>
+      fetchWithAuth(`/subjects/${id}`, token, {
+        method: "DELETE",
+      }),
+    [token]
+  );
+
   const {
     items: subjects,
     loading,
@@ -23,13 +37,8 @@ function SubjectsPage() {
     handleDelete,
   } = usePaginatedResource({
     pageSize: 9,
-    fetchDataFn: (page) =>
-      fetchWithAuth(`/subjects?page=${page}&size=9`, token),
-    deleteFn: (id) =>
-      fetchWithAuth(`/subjects/${id}`, token, {
-        method: "DELETE",
-      }),
-    deps: [token],
+    fetchDataFn: fetchSubjects,
+    deleteFn: deleteSubject,
   });
 
   if (loading) return <p>Cargando...</p>;

@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import PageForm from "../../components/PageForm";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { fetchWithAuth } from "../../api/fetchWithAuth";
 import SectionHeader from "../../components/SectionHeader";
 import { getErrorMessage } from "../../utils/errorMessage";
